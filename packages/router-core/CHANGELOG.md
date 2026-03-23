@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.3
+
+### Patch Changes
+
+- feat: transformAssets ([#7023](https://github.com/TanStack/router/pull/7023))
+
 ## 1.168.2
 
 ### Patch Changes

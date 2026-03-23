@@ -1,5 +1,14 @@
 # @tanstack/solid-router
 
+## 1.168.3
+
+### Patch Changes
+
+- feat: transformAssets ([#7023](https://github.com/TanStack/router/pull/7023))
+
+- Updated dependencies [[`d81d21a`](https://github.com/TanStack/router/commit/d81d21ad05c9401bf54b24acd29401e1e4fd624c)]:
+  - @tanstack/router-core@1.168.3
+
 ## 1.168.2
 
 ### Patch Changes

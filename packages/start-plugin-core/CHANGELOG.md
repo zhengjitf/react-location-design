@@ -1,5 +1,18 @@
 # @tanstack/start-plugin-core
 
+## 1.167.8
+
+### Patch Changes
+
+- feat: transformAssets ([#7023](https://github.com/TanStack/router/pull/7023))
+
+- Updated dependencies [[`d81d21a`](https://github.com/TanStack/router/commit/d81d21ad05c9401bf54b24acd29401e1e4fd624c)]:
+  - @tanstack/router-core@1.168.3
+  - @tanstack/start-server-core@1.167.3
+  - @tanstack/router-generator@1.166.17
+  - @tanstack/router-plugin@1.167.4
+  - @tanstack/start-client-core@1.167.3
+
 ## 1.167.7
 
 ### Patch Changes
