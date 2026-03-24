@@ -1,5 +1,11 @@
 # @tanstack/start-plugin-core
 
+## 1.167.9
+
+### Patch Changes
+
+- Deduplicate CSS assets in the Start manifest so shared stylesheets are not repeated within a route entry or across an active parent-child route chain. ([#7030](https://github.com/TanStack/router/pull/7030))
+
 ## 1.167.8
 
 ### Patch Changes
