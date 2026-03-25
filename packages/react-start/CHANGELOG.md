@@ -1,5 +1,11 @@
 # @tanstack/react-start
 
+## 1.167.8
+
+### Patch Changes
+
+- Fix the `server-entry` package export types path so published packages include the expected declaration files, and add build-time package validation to catch similar export issues during CI. ([#7035](https://github.com/TanStack/router/pull/7035))
+
 ## 1.167.7
 
 ### Patch Changes
