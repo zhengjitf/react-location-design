@@ -1,5 +1,14 @@
 # @tanstack/vue-router
 
+## 1.168.4
+
+### Patch Changes
+
+- tanstack/store 0.9.3 ([#7041](https://github.com/TanStack/router/pull/7041))
+
+- Updated dependencies [[`71a8b68`](https://github.com/TanStack/router/commit/71a8b684c87c37fd4a033d99f5ba4a05c7a179f5)]:
+  - @tanstack/router-core@1.168.4
+
 ## 1.168.3
 
 ### Patch Changes
