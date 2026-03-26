@@ -1,5 +1,13 @@
 # @tanstack/react-router
 
+## 1.168.6
+
+### Patch Changes
+
+- Remove the extra SSR sentinel tag used for `onRendered` in React Router while ([#7054](https://github.com/TanStack/router/pull/7054))
+  preserving the client-side render timing needed for scroll restoration and
+  `onRendered` subscribers.
+
 ## 1.168.5
 
 ### Patch Changes
