@@ -1,5 +1,11 @@
 # @tanstack/router-generator
 
+## 1.166.20
+
+### Patch Changes
+
+- Fix file-based route generation when custom `routeToken` or `indexToken` values start with regex metacharacters like `+`. ([#7048](https://github.com/TanStack/router/pull/7048))
+
 ## 1.166.19
 
 ### Patch Changes
