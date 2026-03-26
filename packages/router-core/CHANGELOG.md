@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.5
+
+### Patch Changes
+
+- fix: scroll restoration without throttling ([#7042](https://github.com/TanStack/router/pull/7042))
+
 ## 1.168.4
 
 ### Patch Changes
