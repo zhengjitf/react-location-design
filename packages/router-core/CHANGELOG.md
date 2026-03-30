@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.8
+
+### Patch Changes
+
+- Fix preload from continuing into child `beforeLoad` and `head` handlers after a parent `beforeLoad` fails. ([#7075](https://github.com/TanStack/router/pull/7075))
+
 ## 1.168.7
 
 ### Patch Changes
