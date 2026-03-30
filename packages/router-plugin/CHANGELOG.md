@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.10
+
+### Patch Changes
+
+- Initialize `import.meta.hot.data` before storing stable split components so Vitest does not crash when HMR data is missing. ([#7074](https://github.com/TanStack/router/pull/7074))
+
 ## 1.167.9
 
 ### Patch Changes
