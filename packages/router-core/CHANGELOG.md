@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.9
+
+### Patch Changes
+
+- Preserve component-thrown `notFound()` errors through framework error boundaries so route `notFoundComponent` handlers render without requiring an explicit `routeId`. ([#7077](https://github.com/TanStack/router/pull/7077))
+
 ## 1.168.8
 
 ### Patch Changes
