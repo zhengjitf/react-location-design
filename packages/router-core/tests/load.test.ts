@@ -3,13 +3,18 @@ import { createMemoryHistory } from '@tanstack/history'
 import {
   BaseRootRoute,
   BaseRoute,
-  RouterCore,
   notFound,
   redirect,
   rootRouteId,
 } from '../src'
+import { createTestRouter } from './routerTestUtils'
 import { loadMatches } from '../src/load-matches'
-import type { AnyRouter, LoaderStaleReloadMode, RootRouteOptions } from '../src'
+import type {
+  AnyRouter,
+  LoaderStaleReloadMode,
+  RootRouteOptions,
+  RouterCore,
+} from '../src'
 
 type AnyRouteOptions = RootRouteOptions<any>
 type BeforeLoad = NonNullable<AnyRouteOptions['beforeLoad']>
@@ -26,7 +31,7 @@ describe('redirect resolution', () => {
 
     const routeTree = rootRoute.addChildren([fooRoute])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({
         initialEntries: ['https://example.com/foo'],
@@ -59,7 +64,7 @@ describe('redirect resolution', () => {
 
       const routeTree = rootRoute.addChildren([slugRoute])
 
-      const router = new RouterCore({
+      const router = createTestRouter({
         routeTree,
         history: createMemoryHistory({ initialEntries: [initialPath] }),
         isServer: true,
@@ -94,7 +99,7 @@ describe('beforeLoad skip or exec', () => {
 
     const routeTree = rootRoute.addChildren([fooRoute, barRoute])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -114,7 +119,7 @@ describe('beforeLoad skip or exec', () => {
     const router = setup({ beforeLoad })
     const navigation = router.navigate({ to: '/foo' })
     expect(beforeLoad).toHaveBeenCalledTimes(1)
-    expect(router.state.pendingMatches).toEqual(
+    expect(router.stores.pendingMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await navigation
@@ -136,7 +141,7 @@ describe('beforeLoad skip or exec', () => {
     const beforeLoad = vi.fn()
     const router = setup({ beforeLoad })
     await router.preloadRoute({ to: '/foo' })
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await sleep(10)
@@ -150,7 +155,7 @@ describe('beforeLoad skip or exec', () => {
     const router = setup({ beforeLoad })
     router.preloadRoute({ to: '/foo' })
     await Promise.resolve()
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await router.navigate({ to: '/foo' })
@@ -198,14 +203,18 @@ describe('beforeLoad skip or exec', () => {
     })
     await router.preloadRoute({ to: '/foo' })
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     await sleep(10)
     await router.navigate({ to: '/foo' })
 
     expect(router.state.location.pathname).toBe('/foo')
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     expect(beforeLoad).toHaveBeenCalledTimes(2)
   })
@@ -221,13 +230,17 @@ describe('beforeLoad skip or exec', () => {
     router.preloadRoute({ to: '/foo' })
     await Promise.resolve()
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     await router.navigate({ to: '/foo' })
 
     expect(router.state.location.pathname).toBe('/foo')
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     expect(beforeLoad).toHaveBeenCalledTimes(2)
   })
@@ -245,6 +258,41 @@ describe('beforeLoad skip or exec', () => {
     await router.navigate({ to: '/foo' })
 
     expect(beforeLoad).toHaveBeenCalledTimes(2)
+  })
+
+  test('skip child beforeLoad when parent beforeLoad throws during preload', async () => {
+    const parentBeforeLoad = vi.fn<BeforeLoad>(async ({ preload }) => {
+      if (preload) throw new Error('parent error')
+    })
+    const childBeforeLoad = vi.fn<BeforeLoad>()
+    const parentHead = vi.fn(() => ({ meta: [{ title: 'Parent' }] }))
+    const childHead = vi.fn(() => ({ meta: [{ title: 'Child' }] }))
+
+    const rootRoute = new BaseRootRoute({})
+    const parentRoute = new BaseRoute({
+      getParentRoute: () => rootRoute,
+      path: '/parent',
+      beforeLoad: parentBeforeLoad,
+      head: parentHead,
+    })
+    const childRoute = new BaseRoute({
+      getParentRoute: () => parentRoute,
+      path: '/child',
+      beforeLoad: childBeforeLoad,
+      head: childHead,
+    })
+
+    const router = createTestRouter({
+      routeTree: rootRoute.addChildren([parentRoute.addChildren([childRoute])]),
+      history: createMemoryHistory(),
+    })
+
+    await router.preloadRoute({ to: '/parent/child' })
+
+    expect(parentBeforeLoad).toHaveBeenCalledTimes(1)
+    expect(childBeforeLoad).not.toHaveBeenCalled()
+    expect(parentHead).toHaveBeenCalledTimes(1)
+    expect(childHead).not.toHaveBeenCalled()
   })
 
   test('exec if pending preload (error)', async () => {
@@ -290,7 +338,7 @@ describe('loader skip or exec', () => {
 
     const routeTree = rootRoute.addChildren([fooRoute, barRoute])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       defaultStaleReloadMode,
       history: createMemoryHistory(),
@@ -311,7 +359,7 @@ describe('loader skip or exec', () => {
     const router = setup({ loader })
     const navigation = router.navigate({ to: '/foo' })
     expect(loader).toHaveBeenCalledTimes(1)
-    expect(router.state.pendingMatches).toEqual(
+    expect(router.stores.pendingMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await navigation
@@ -333,7 +381,7 @@ describe('loader skip or exec', () => {
     const loader = vi.fn()
     const router = setup({ loader })
     await router.preloadRoute({ to: '/foo' })
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await sleep(10)
@@ -346,7 +394,7 @@ describe('loader skip or exec', () => {
     const loader = vi.fn()
     const router = setup({ loader, staleTime: 1000 })
     await router.preloadRoute({ to: '/foo' })
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await sleep(10)
@@ -360,7 +408,7 @@ describe('loader skip or exec', () => {
     const router = setup({ loader })
     router.preloadRoute({ to: '/foo' })
     await Promise.resolve()
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
     await router.navigate({ to: '/foo' })
@@ -408,14 +456,18 @@ describe('loader skip or exec', () => {
     })
     await router.preloadRoute({ to: '/foo' })
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     await sleep(10)
     await router.navigate({ to: '/foo' })
 
     expect(router.state.location.pathname).toBe('/foo')
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     expect(loader).toHaveBeenCalledTimes(2)
   })
@@ -431,13 +483,17 @@ describe('loader skip or exec', () => {
     router.preloadRoute({ to: '/foo' })
     await Promise.resolve()
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     await router.navigate({ to: '/foo' })
 
     expect(router.state.location.pathname).toBe('/bar')
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
     expect(loader).toHaveBeenCalledTimes(1)
   })
@@ -447,7 +503,7 @@ describe('loader skip or exec', () => {
     const router = setup({ loader })
 
     await router.preloadRoute({ to: '/foo' })
-    expect(router.state.cachedMatches).toEqual(
+    expect(router.stores.cachedMatchesSnapshot.state).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: '/foo/foo' })]),
     )
 
@@ -456,11 +512,15 @@ describe('loader skip or exec', () => {
       status: 'redirected',
     }))
 
-    expect(router.state.cachedMatches.some((d) => d.id === '/foo/foo')).toBe(
-      false,
-    )
     expect(
-      router.state.cachedMatches.some((d) => d.status === 'redirected'),
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.id === '/foo/foo',
+      ),
+    ).toBe(false)
+    expect(
+      router.stores.cachedMatchesSnapshot.state.some(
+        (d) => d.status === 'redirected',
+      ),
     ).toBe(false)
   })
 
@@ -533,7 +593,7 @@ test('exec on stay (beforeLoad & loader)', async () => {
     layoutRoute.addChildren([fooRoute, barRoute]),
   ])
 
-  const router = new RouterCore({
+  const router = createTestRouter({
     routeTree,
     history: createMemoryHistory(),
     defaultStaleTime: 1000,
@@ -588,8 +648,10 @@ describe('stale loader reload triggers', () => {
     id: string,
   ) =>
     router.state.matches.find((match) => match.id === id) ??
-    router.state.pendingMatches?.find((match) => match.id === id) ??
-    router.state.cachedMatches.find((match) => match.id === id)
+    router.stores.pendingMatchesSnapshot.state.find(
+      (match) => match.id === id,
+    ) ??
+    router.stores.cachedMatchesSnapshot.state.find((match) => match.id === id)
 
   const hasActiveMatch = (
     router: RouterCore<any, any, any, any, any>,
@@ -599,7 +661,10 @@ describe('stale loader reload triggers', () => {
   const hasPendingMatch = (
     router: RouterCore<any, any, any, any, any>,
     id: string,
-  ) => router.state.pendingMatches?.some((match) => match.id === id) ?? false
+  ) =>
+    router.stores.pendingMatchesSnapshot.state.some(
+      (match) => match.id === id,
+    ) ?? false
 
   const setup = ({
     loader,
@@ -627,7 +692,7 @@ describe('stale loader reload triggers', () => {
 
     const routeTree = rootRoute.addChildren([fooRoute, barRoute])
 
-    return new RouterCore({
+    return createTestRouter({
       routeTree,
       defaultStaleReloadMode,
       history: createMemoryHistory(),
@@ -745,7 +810,7 @@ describe('stale loader reload triggers', () => {
     })
 
     const routeTree = rootRoute.addChildren([fooRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -774,7 +839,7 @@ describe('stale loader reload triggers', () => {
     })
 
     const routeTree = rootRoute.addChildren([fooRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -814,7 +879,7 @@ describe('stale loader reload triggers', () => {
     const routeTree = rootRoute.addChildren([
       rootChildRoute.addChildren([leafRoute]),
     ])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -871,7 +936,7 @@ describe('stale loader reload triggers', () => {
     })
 
     const routeTree = rootRoute.addChildren([orgRoute.addChildren([userRoute])])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -914,7 +979,7 @@ describe('stale loader reload triggers', () => {
     })
 
     const routeTree = rootRoute.addChildren([orgRoute.addChildren([userRoute])])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -951,7 +1016,7 @@ describe('stale loader reload triggers', () => {
     })
 
     const routeTree = rootRoute.addChildren([fooRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -1068,7 +1133,7 @@ test('cancelMatches after pending timeout', async () => {
     path: '/bar',
   })
   const routeTree = rootRoute.addChildren([fooRoute, barRoute])
-  const router = new RouterCore({ routeTree, history: createMemoryHistory() })
+  const router = createTestRouter({ routeTree, history: createMemoryHistory() })
 
   await router.load()
   router.navigate({ to: '/foo' })
@@ -1153,7 +1218,7 @@ describe('head execution', () => {
       level1Route.addChildren([level2Route.addChildren([level3Route])]),
     ])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({
         initialEntries: ['/level-1/level-2/level-3'],
@@ -1242,7 +1307,7 @@ describe('head execution', () => {
       head,
     })
     const routeTree = rootRoute.addChildren([testRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/test'] }),
     })
@@ -1278,26 +1343,14 @@ describe('head execution', () => {
     })
 
     const routeTree = rootRoute.addChildren([childRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/test'] }),
     })
 
     const location = router.latestLocation
     const matches = router.matchRoutes(location)
-
-    ;(
-      router as unknown as {
-        __store: {
-          setState: (
-            updater: (s: { pendingMatches?: typeof matches }) => unknown,
-          ) => void
-        }
-      }
-    ).__store.setState((s) => ({
-      ...s,
-      pendingMatches: matches,
-    }))
+    router.stores.setPendingMatches(matches)
 
     await expect(
       loadMatches({
@@ -1341,26 +1394,14 @@ describe('head execution', () => {
     })
 
     const routeTree = rootRoute.addChildren([childRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/test'] }),
     })
 
     const location = router.latestLocation
     const matches = router.matchRoutes(location)
-
-    ;(
-      router as unknown as {
-        __store: {
-          setState: (
-            updater: (s: { pendingMatches?: typeof matches }) => unknown,
-          ) => void
-        }
-      }
-    ).__store.setState((s) => ({
-      ...s,
-      pendingMatches: matches,
-    }))
+    router.stores.setPendingMatches(matches)
 
     await expect(
       loadMatches({
@@ -1479,7 +1520,7 @@ describe('head execution', () => {
         throw beforeLoadNotFound
       }
 
-      const router = new RouterCore({
+      const router = createTestRouter({
         routeTree,
         history: createMemoryHistory({
           initialEntries: ['/level-1/level-2/level-3'],
@@ -1507,19 +1548,7 @@ describe('head execution', () => {
     const runLoadMatchesAndCapture = async (router: AnyRouter) => {
       const location = router.latestLocation
       const matches = router.matchRoutes(location)
-
-      ;(
-        router as unknown as {
-          __store: {
-            setState: (
-              updater: (s: { pendingMatches?: typeof matches }) => unknown,
-            ) => void
-          }
-        }
-      ).__store.setState((s) => ({
-        ...s,
-        pendingMatches: matches,
-      }))
+      router.stores.setPendingMatches(matches)
 
       try {
         await loadMatches({
@@ -1737,7 +1766,7 @@ describe('head execution', () => {
         }),
       )
 
-      const rootMatch = router.state.pendingMatches!.find(
+      const rootMatch = router.stores.pendingMatchesSnapshot.state.find(
         (m) => m.routeId === routes[0].id,
       )
 
@@ -1766,7 +1795,7 @@ describe('head execution', () => {
       const second = await runLoadMatchesAndCapture(router)
       expect(second.error).toBeUndefined()
 
-      const rootMatch = router.state.pendingMatches!.find(
+      const rootMatch = router.stores.pendingMatchesSnapshot.state.find(
         (m) => m.routeId === routes[0].id,
       )
 
@@ -1792,7 +1821,7 @@ describe('head execution', () => {
 
       const routeTree = rootRoute.addChildren([childRoute])
 
-      const router = new RouterCore({
+      const router = createTestRouter({
         routeTree,
         history: createMemoryHistory({ initialEntries: ['/test'] }),
       })
@@ -1802,9 +1831,10 @@ describe('head execution', () => {
       expect(rootLoader).toHaveBeenCalledTimes(1)
 
       const staleRootNotFound = notFound({ data: { source: 'stale-root' } })
-      const currentRootMatchId = router.state.pendingMatches!.find(
-        (m) => m.routeId === rootRoute.id,
-      )!.id
+      const currentRootMatchId =
+        router.stores.pendingMatchesSnapshot.state.find(
+          (m) => m.routeId === rootRoute.id,
+        )!.id
 
       router.updateMatch(currentRootMatchId, (prev) => ({
         ...prev,
@@ -1819,18 +1849,7 @@ describe('head execution', () => {
       pendingRootMatch.status = 'success'
       pendingRootMatch.globalNotFound = false
       pendingRootMatch.error = undefined
-      ;(
-        router as unknown as {
-          __store: {
-            setState: (
-              updater: (s: { pendingMatches?: typeof matches }) => unknown,
-            ) => void
-          }
-        }
-      ).__store.setState((s) => ({
-        ...s,
-        pendingMatches: matches,
-      }))
+      router.stores.setPendingMatches(matches)
 
       await expect(
         loadMatches({
@@ -1843,7 +1862,7 @@ describe('head execution', () => {
 
       expect(rootLoader).toHaveBeenCalledTimes(1)
 
-      const rootMatch = router.state.pendingMatches!.find(
+      const rootMatch = router.stores.pendingMatchesSnapshot.state.find(
         (m) => m.routeId === rootRoute.id,
       )
 
@@ -1870,14 +1889,16 @@ describe('params.parse notFound', () => {
       },
     })
     const routeTree = rootRoute.addChildren([testRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/test/invalid'] }),
     })
 
     await router.load()
 
-    const match = router.state.matches.find((m) => m.routeId === testRoute.id)
+    const match = router.stores.activeMatchesSnapshot.state.find(
+      (m) => m.routeId === testRoute.id,
+    )
 
     expect(match?.status).toBe('notFound')
   })
@@ -1898,7 +1919,7 @@ describe('params.parse notFound', () => {
       },
     })
     const routeTree = rootRoute.addChildren([testRoute])
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/test/123'] }),
     })
@@ -1922,7 +1943,7 @@ describe('routeId in context options', () => {
 
     const routeTree = rootRoute.addChildren([])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -1958,7 +1979,7 @@ describe('routeId in context options', () => {
 
     const routeTree = rootRoute.addChildren([fooRoute])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -2005,7 +2026,7 @@ describe('routeId in context options', () => {
       parentRoute.addChildren([childRoute]),
     ])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -2048,7 +2069,7 @@ describe('routeId in context options', () => {
 
     const routeTree = rootRoute.addChildren([postRoute])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })
@@ -2088,7 +2109,7 @@ describe('routeId in context options', () => {
       layoutRoute.addChildren([indexRoute]),
     ])
 
-    const router = new RouterCore({
+    const router = createTestRouter({
       routeTree,
       history: createMemoryHistory(),
     })

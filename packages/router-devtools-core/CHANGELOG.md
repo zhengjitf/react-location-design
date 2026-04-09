@@ -1,5 +1,27 @@
 # @tanstack/router-devtools-core
 
+## 1.167.1
+
+### Patch Changes
+
+- Replace tiny-invariant and tiny-warning with in-house solution for bundle-size ([#7007](https://github.com/TanStack/router/pull/7007))
+
+- Updated dependencies [[`c9e1855`](https://github.com/TanStack/router/commit/c9e18555f3a5531e96de8f574cfca9edcdb18e5c)]:
+  - @tanstack/router-core@1.168.2
+
+## 1.167.0
+
+### Minor Changes
+
+- remove pendingMatches, cachedMatches ([#6704](https://github.com/TanStack/router/pull/6704))
+  move to signal-based reactivity
+  solid uses its own native signals
+
+### Patch Changes
+
+- Updated dependencies [[`0545239`](https://github.com/TanStack/router/commit/054523900b2ee19308e5a88417dadfc6923afe30)]:
+  - @tanstack/router-core@1.168.0
+
 ## 1.166.9
 
 ### Patch Changes

@@ -190,8 +190,8 @@ tool](https://docs.netlify.com/start/quickstarts/deploy-from-ai-code-generation-
 
 <a href="https://railway.com?utm_source=tanstack" alt="Railway Logo">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/tanstack/tanstack.com/main/src/images/railway-dark.svg" width="280">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/tanstack/tanstack.com/main/src/images/railway-light.svg" width="280">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/tanstack/tanstack.com/main/src/images/railway-white.svg" width="280">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/tanstack/tanstack.com/main/src/images/railway-black.svg" width="280">
     <img alt="Railway logo" src="https://raw.githubusercontent.com/tanstack/tanstack.com/main/src/images/railway-light.svg" width="280">
   </picture>
 </a>
@@ -288,7 +288,7 @@ npm run start
 ### Bun
 
 > [!IMPORTANT]
-> Currently, the Bun specific deployment guidelines only work with React 19. If you are using React 18, please refer to the [Node.js](#nodejs--railway--docker) deployment guidelines.
+> Currently, the Bun specific deployment guidelines only work with React 19. If you are using React 18, please refer to the [Node.js](#nodejs--docker) deployment guidelines.
 
 Make sure that your `react` and `react-dom` packages are set to version 19.0.0 or higher in your `package.json` file. If not, run the following command to upgrade the packages:
 
@@ -420,7 +420,7 @@ When deploying to [Appwrite Sites](https://appwrite.io/products/sites), you'll n
 1. **Create a TanStack Start app** (or use an existing one)
 
 ```bash
-npm create @tanstack/start@latest
+npx @tanstack/cli@latest create
 ```
 
 2. **Push your project to a GitHub repository**

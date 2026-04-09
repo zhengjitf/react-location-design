@@ -1,5 +1,4 @@
 import { clsx as cx } from 'clsx'
-import { default as invariant } from 'tiny-invariant'
 import { interpolatePath, rootRouteId, trimPath } from '@tanstack/router-core'
 import {
   For,
@@ -102,6 +101,7 @@ function NavigateLink(props: {
 
 function RouteComp({
   routerState,
+  pendingMatches,
   router,
   route,
   isRoot,
@@ -133,6 +133,7 @@ function RouteComp({
       MakeRouteMatchUnion
     >
   >
+  pendingMatches: Accessor<Array<AnyRouteMatch>>
   router: Accessor<AnyRouter>
   route: AnyRoute
   isRoot?: boolean
@@ -140,8 +141,8 @@ function RouteComp({
   setActiveId: (id: string) => void
 }) {
   const styles = useStyles()
-  const matches = createMemo(
-    () => routerState().pendingMatches || routerState().matches,
+  const matches = createMemo(() =>
+    pendingMatches().length ? pendingMatches() : routerState().matches,
   )
   const match = createMemo(() =>
     routerState().matches.find((d) => d.routeId === route.id),
@@ -231,6 +232,7 @@ function RouteComp({
             .map((r) => (
               <RouteComp
                 routerState={routerState}
+                pendingMatches={pendingMatches}
                 router={router}
                 route={r}
                 activeId={activeId}
@@ -261,12 +263,7 @@ export const BaseTanStackRouterDevtoolsPanel =
     const styles = useStyles()
     const { className, style, ...otherPanelProps } = panelProps
 
-    invariant(
-      router,
-      'No router was found for the TanStack Router Devtools. Please place the devtools in the <RouterProvider> component tree or pass the router instance to the devtools manually.',
-    )
-
-    // useStore(router.__store)
+    // useStore(router.stores.__store)
 
     const [currentTab, setCurrentTab] = useLocalStorage<
       'routes' | 'matches' | 'history'
@@ -279,6 +276,49 @@ export const BaseTanStackRouterDevtoolsPanel =
 
     const [history, setHistory] = createSignal<Array<AnyRouteMatch>>([])
     const [hasHistoryOverflowed, setHasHistoryOverflowed] = createSignal(false)
+
+    let pendingMatches: Accessor<Array<AnyRouteMatch>>
+    let cachedMatches: Accessor<Array<AnyRouteMatch>>
+    // subscribable implementation
+    if ('subscribe' in router().stores.pendingMatchesSnapshot) {
+      const [_pendingMatches, setPendingMatches] = createSignal<
+        Array<AnyRouteMatch>
+      >([])
+      pendingMatches = _pendingMatches
+
+      const [_cachedMatches, setCachedMatches] = createSignal<
+        Array<AnyRouteMatch>
+      >([])
+      cachedMatches = _cachedMatches
+
+      type Subscribe = (fn: () => void) => { unsubscribe: () => void }
+      createEffect(() => {
+        const pendingMatchesStore = router().stores.pendingMatchesSnapshot
+        setPendingMatches(pendingMatchesStore.state)
+        const subscription = (
+          (pendingMatchesStore as any).subscribe as Subscribe
+        )(() => {
+          setPendingMatches(pendingMatchesStore.state)
+        })
+        onCleanup(() => subscription.unsubscribe())
+      })
+
+      createEffect(() => {
+        const cachedMatchesStore = router().stores.cachedMatchesSnapshot
+        setCachedMatches(cachedMatchesStore.state)
+        const subscription = (
+          (cachedMatchesStore as any).subscribe as Subscribe
+        )(() => {
+          setCachedMatches(cachedMatchesStore.state)
+        })
+        onCleanup(() => subscription.unsubscribe())
+      })
+    }
+    // signal implementation
+    else {
+      pendingMatches = () => router().stores.pendingMatchesSnapshot.state
+      cachedMatches = () => router().stores.cachedMatchesSnapshot.state
+    }
 
     createEffect(() => {
       const matches = routerState().matches
@@ -309,9 +349,9 @@ export const BaseTanStackRouterDevtoolsPanel =
 
     const activeMatch = createMemo(() => {
       const matches = [
-        ...(routerState().pendingMatches ?? []),
+        ...pendingMatches(),
         ...routerState().matches,
-        ...routerState().cachedMatches,
+        ...cachedMatches(),
       ]
       return matches.find(
         (d) => d.routeId === activeId() || d.id === activeId(),
@@ -348,7 +388,7 @@ export const BaseTanStackRouterDevtoolsPanel =
             (d) =>
               typeof d[1] !== 'function' &&
               ![
-                '__store',
+                'stores',
                 'basepath',
                 'injectedHtml',
                 'subscribers',
@@ -512,6 +552,7 @@ export const BaseTanStackRouterDevtoolsPanel =
                 <Match when={currentTab() === 'routes'}>
                   <RouteComp
                     routerState={routerState}
+                    pendingMatches={pendingMatches}
                     router={router}
                     route={router().routeTree}
                     isRoot
@@ -521,10 +562,10 @@ export const BaseTanStackRouterDevtoolsPanel =
                 </Match>
                 <Match when={currentTab() === 'matches'}>
                   <div>
-                    {(routerState().pendingMatches?.length
-                      ? routerState().pendingMatches
+                    {(pendingMatches().length
+                      ? pendingMatches()
                       : routerState().matches
-                    )?.map((match: any, _i: any) => {
+                    ).map((match: any, _i: any) => {
                       return (
                         <div
                           role="button"
@@ -608,7 +649,7 @@ export const BaseTanStackRouterDevtoolsPanel =
               </Switch>
             </div>
           </div>
-          {routerState().cachedMatches.length ? (
+          {cachedMatches().length ? (
             <div class={styles().cachedMatchesContainer}>
               <div class={styles().detailsHeader}>
                 <div>Cached Matches</div>
@@ -617,7 +658,7 @@ export const BaseTanStackRouterDevtoolsPanel =
                 </div>
               </div>
               <div>
-                {routerState().cachedMatches.map((match: any) => {
+                {cachedMatches().map((match: any) => {
                   return (
                     <div
                       role="button"
@@ -679,9 +720,7 @@ export const BaseTanStackRouterDevtoolsPanel =
                 <div class={styles().matchDetailsInfoLabel}>
                   <div>State:</div>
                   <div class={styles().matchDetailsInfo}>
-                    {routerState().pendingMatches?.find(
-                      (d: any) => d.id === activeMatch()?.id,
-                    )
+                    {pendingMatches().find((d) => d.id === activeMatch()?.id)
                       ? 'Pending'
                       : routerState().matches.find(
                             (d: any) => d.id === activeMatch()?.id,

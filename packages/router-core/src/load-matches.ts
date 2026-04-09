@@ -1,6 +1,5 @@
-import invariant from 'tiny-invariant'
 import { isServer } from '@tanstack/router-core/isServer'
-import { batch } from './utils/batch'
+import { invariant } from './invariant'
 import { createControlledPromise, isPromise } from './utils'
 import { isNotFound } from './not-found'
 import { rootRouteId } from './root'
@@ -45,9 +44,15 @@ const triggerOnReady = (inner: InnerLoadContext): void | Promise<void> => {
   }
 }
 
+const hasForcePendingActiveMatch = (router: AnyRouter): boolean => {
+  return router.stores.matchesId.state.some((matchId) => {
+    return router.stores.activeMatchStoresById.get(matchId)?.state._forcePending
+  })
+}
+
 const resolvePreload = (inner: InnerLoadContext, matchId: string): boolean => {
   return !!(
-    inner.preload && !inner.router.state.matches.some((d) => d.id === matchId)
+    inner.preload && !inner.router.stores.activeMatchStoresById.has(matchId)
   )
 }
 
@@ -438,7 +443,7 @@ const executeBeforeLoad = (
   // if there is no `beforeLoad` option, just mark as pending and resolve
   // Context will be updated later in loadRouteMatch after loader completes
   if (!route.options.beforeLoad) {
-    batch(() => {
+    inner.router.batch(() => {
       pending()
       resolve()
     })
@@ -486,7 +491,7 @@ const executeBeforeLoad = (
 
   const updateContext = (beforeLoadContext: any) => {
     if (beforeLoadContext === undefined) {
-      batch(() => {
+      inner.router.batch(() => {
         pending()
         resolve()
       })
@@ -497,7 +502,7 @@ const executeBeforeLoad = (
       handleSerialError(inner, index, beforeLoadContext, 'BEFORE_LOAD')
     }
 
-    batch(() => {
+    inner.router.batch(() => {
       pending()
       inner.updateMatch(matchId, (prev) => ({
         ...prev,
@@ -813,7 +818,7 @@ const loadRouteMatch = async (
     // If the route is successful and still fresh, just resolve
     const { status, invalid } = match
     const staleMatchShouldReload =
-      age > staleAge &&
+      age >= staleAge &&
       (!!inner.forceStaleReload ||
         match.cause === 'enter' ||
         (previousRouteMatchId !== undefined &&
@@ -874,10 +879,17 @@ const loadRouteMatch = async (
     }
   } else {
     const prevMatch = inner.router.getMatch(matchId)! // This is where all of the stale-while-revalidate magic happens
+    const activeIdAtIndex = inner.router.stores.matchesId.state[index]
+    const activeAtIndex =
+      (activeIdAtIndex &&
+        inner.router.stores.activeMatchStoresById.get(activeIdAtIndex)) ||
+      null
     const previousRouteMatchId =
-      inner.router.state.matches[index]?.routeId === routeId
-        ? inner.router.state.matches[index]!.id
-        : inner.router.state.matches.find((d) => d.routeId === routeId)?.id
+      activeAtIndex?.routeId === routeId
+        ? activeIdAtIndex
+        : inner.router.stores.activeMatchesSnapshot.state.find(
+            (d) => d.routeId === routeId,
+          )?.id
     const preload = resolvePreload(inner, matchId)
 
     // there is a loaderPromise, so we are in the middle of a load
@@ -911,7 +923,7 @@ const loadRouteMatch = async (
       }
     } else {
       const nextPreload =
-        preload && !inner.router.state.matches.some((d) => d.id === matchId)
+        preload && !inner.router.stores.activeMatchStoresById.has(matchId)
       const match = inner.router.getMatch(matchId)!
       match._nonReactive.loaderPromise = createControlledPromise<void>()
       if (nextPreload !== match.preload) {
@@ -966,7 +978,7 @@ export async function loadMatches(arg: {
   // the pending component was already rendered on the server and we want to keep it shown on the client until minPendingMs is reached
   if (
     !(isServer ?? inner.router.isServer) &&
-    inner.router.state.matches.some((d) => d._forcePending)
+    hasForcePendingActiveMatch(inner.router)
   ) {
     triggerOnReady(inner)
   }
@@ -990,7 +1002,7 @@ export async function loadMatches(arg: {
       break
     }
 
-    if (inner.serialError) {
+    if (inner.serialError || inner.firstBadMatchIndex != null) {
       break
     }
   }
@@ -1045,9 +1057,10 @@ export async function loadMatches(arg: {
     firstNotFound ??
     (beforeLoadNotFound && !inner.preload ? beforeLoadNotFound : undefined)
 
-  let headMaxIndex = inner.serialError
-    ? (inner.firstBadMatchIndex ?? 0)
-    : inner.matches.length - 1
+  let headMaxIndex =
+    inner.firstBadMatchIndex !== undefined
+      ? inner.firstBadMatchIndex
+      : inner.matches.length - 1
 
   if (!notFoundToThrow && beforeLoadNotFound && inner.preload) {
     return inner.matches
@@ -1064,10 +1077,15 @@ export async function loadMatches(arg: {
       notFoundToThrow,
     )
 
-    invariant(
-      renderedBoundaryIndex !== undefined,
-      'Could not find match for notFound boundary',
-    )
+    if (renderedBoundaryIndex === undefined) {
+      if (process.env.NODE_ENV !== 'production') {
+        throw new Error(
+          'Invariant failed: Could not find match for notFound boundary',
+        )
+      }
+
+      invariant()
+    }
     const boundaryMatch = inner.matches[renderedBoundaryIndex]!
 
     const boundaryRoute = inner.router.looseRoutesById[boundaryMatch.routeId]!
