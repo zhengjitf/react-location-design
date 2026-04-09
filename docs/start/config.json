@@ -22,10 +22,6 @@
               "to": "framework/react/getting-started"
             },
             {
-              "label": "Quick Start",
-              "to": "framework/react/quick-start"
-            },
-            {
               "label": "Build from Scratch",
               "to": "framework/react/build-from-scratch"
             },
@@ -53,10 +49,6 @@
             {
               "label": "Getting Started",
               "to": "framework/solid/getting-started"
-            },
-            {
-              "label": "Quick Start",
-              "to": "framework/solid/quick-start"
             },
             {
               "label": "Build from Scratch",
