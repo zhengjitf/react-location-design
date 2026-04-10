@@ -1,5 +1,11 @@
 # @tanstack/solid-router
 
+## 1.168.11
+
+### Patch Changes
+
+- Fix redirected pending route transitions so lazy target routes can finish loading without stale redirected matches causing render errors. ([#7137](https://github.com/TanStack/router/pull/7137))
+
 ## 1.168.10
 
 ### Patch Changes
