@@ -1,5 +1,13 @@
 # @tanstack/react-router
 
+## 1.168.13
+
+### Patch Changes
+
+- Fix `MatchRoute` child callback param inference to resolve params from the target `to` route instead of the route path key across React, Solid, and Vue adapters. ([#7139](https://github.com/TanStack/router/pull/7139))
+
+- Fix a stale route error boundary state issue that could briefly render the next route's `errorComponent` after navigating away from a failed route. ([#7136](https://github.com/TanStack/router/pull/7136))
+
 ## 1.168.12
 
 ### Patch Changes

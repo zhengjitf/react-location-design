@@ -12,9 +12,9 @@
     "postinstall": "npm run cf-typegen"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.168.12",
+    "@tanstack/react-router": "^1.168.13",
     "@tanstack/react-router-devtools": "^1.166.11",
-    "@tanstack/react-start": "^1.167.19",
+    "@tanstack/react-start": "^1.167.20",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

@@ -1,5 +1,11 @@
 # @tanstack/solid-router
 
+## 1.168.12
+
+### Patch Changes
+
+- Fix `MatchRoute` child callback param inference to resolve params from the target `to` route instead of the route path key across React, Solid, and Vue adapters. ([#7139](https://github.com/TanStack/router/pull/7139))
+
 ## 1.168.11
 
 ### Patch Changes
