@@ -1,5 +1,11 @@
 # @tanstack/start-client-core
 
+## 1.167.10
+
+### Patch Changes
+
+- Ensure request middleware context wins over colliding client-provided context in server function execution paths, including SSR, GET, and FormData requests. ([#7135](https://github.com/TanStack/router/pull/7135))
+
 ## 1.167.9
 
 ### Patch Changes
