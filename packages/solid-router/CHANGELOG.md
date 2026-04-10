@@ -1,5 +1,11 @@
 # @tanstack/solid-router
 
+## 1.168.10
+
+### Patch Changes
+
+- Fix `Link` to keep internal routing props like `preloadIntentProximity`, `from`, and `unsafeRelative` from leaking to rendered DOM elements across React, Solid, and Vue. ([#7138](https://github.com/TanStack/router/pull/7138))
+
 ## 1.168.9
 
 ### Patch Changes

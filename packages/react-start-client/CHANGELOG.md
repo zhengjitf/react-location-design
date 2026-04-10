@@ -1,5 +1,12 @@
 # @tanstack/react-start-client
 
+## 1.166.27
+
+### Patch Changes
+
+- Updated dependencies [[`4b9ed6c`](https://github.com/TanStack/router/commit/4b9ed6c5cb5437df8607c605728c8338dd2eb02c)]:
+  - @tanstack/react-router@1.168.11
+
 ## 1.166.26
 
 ### Patch Changes
