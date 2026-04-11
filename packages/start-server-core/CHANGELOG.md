@@ -1,5 +1,16 @@
 # @tanstack/start-server-core
 
+## 1.167.18
+
+### Patch Changes
+
+- chore: bump to h3 v2-rc.20 ([#7140](https://github.com/TanStack/router/pull/7140))
+
+- Updated dependencies [[`0e2c900`](https://github.com/TanStack/router/commit/0e2c9003c18ae07c09969189c028f277ea562a7a)]:
+  - @tanstack/router-core@1.168.14
+  - @tanstack/start-client-core@1.167.16
+  - @tanstack/start-storage-context@1.166.28
+
 ## 1.167.17
 
 ### Patch Changes

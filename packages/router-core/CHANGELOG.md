@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.14
+
+### Patch Changes
+
+- chore: bump to h3 v2-rc.20 ([#7140](https://github.com/TanStack/router/pull/7140))
+
 ## 1.168.13
 
 ### Patch Changes
