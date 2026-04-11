@@ -1,5 +1,20 @@
 # @tanstack/react-start
 
+## 1.167.26
+
+### Patch Changes
+
+- migrate createStore > createAtom for simpler API ([#7150](https://github.com/TanStack/router/pull/7150))
+
+- Updated dependencies [[`459057c`](https://github.com/TanStack/router/commit/459057cd2d90cff20d20e51d4964b0a8c950555e)]:
+  - @tanstack/start-client-core@1.167.12
+  - @tanstack/start-server-core@1.167.14
+  - @tanstack/react-router@1.168.14
+  - @tanstack/react-start-client@1.166.31
+  - @tanstack/react-start-rsc@0.0.6
+  - @tanstack/react-start-server@1.166.32
+  - @tanstack/start-plugin-core@1.167.23
+
 ## 1.167.25
 
 ### Patch Changes

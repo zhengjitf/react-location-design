@@ -1,5 +1,16 @@
 # @tanstack/start-server-core
 
+## 1.167.14
+
+### Patch Changes
+
+- migrate createStore > createAtom for simpler API ([#7150](https://github.com/TanStack/router/pull/7150))
+
+- Updated dependencies [[`459057c`](https://github.com/TanStack/router/commit/459057cd2d90cff20d20e51d4964b0a8c950555e)]:
+  - @tanstack/start-client-core@1.167.12
+  - @tanstack/router-core@1.168.10
+  - @tanstack/start-storage-context@1.166.24
+
 ## 1.167.13
 
 ### Patch Changes

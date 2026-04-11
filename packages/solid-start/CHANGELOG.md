@@ -1,5 +1,19 @@
 # @tanstack/solid-start
 
+## 1.167.24
+
+### Patch Changes
+
+- migrate createStore > createAtom for simpler API ([#7150](https://github.com/TanStack/router/pull/7150))
+
+- Updated dependencies [[`459057c`](https://github.com/TanStack/router/commit/459057cd2d90cff20d20e51d4964b0a8c950555e)]:
+  - @tanstack/start-client-core@1.167.12
+  - @tanstack/start-server-core@1.167.14
+  - @tanstack/solid-router@1.168.13
+  - @tanstack/solid-start-client@1.166.29
+  - @tanstack/solid-start-server@1.166.30
+  - @tanstack/start-plugin-core@1.167.23
+
 ## 1.167.23
 
 ### Patch Changes
