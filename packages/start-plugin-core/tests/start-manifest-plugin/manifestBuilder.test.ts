@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { deserialize } from 'seroval'
 import {
   appendUniqueAssets,
   appendUniqueStrings,
@@ -9,7 +10,9 @@ import {
   getRouteFilePathsFromModuleIds,
   normalizeViteClientBuild,
   normalizeViteClientChunk,
+  serializeStartManifest,
   scanClientChunks,
+  type StartManifest,
 } from '../../src/start-manifest-plugin/manifestBuilder'
 import type { Rollup } from 'vite'
 
@@ -19,6 +22,10 @@ function normalizeTestBuild(bundle: Rollup.OutputBundle) {
 
 function normalizeTestChunk(chunk: Rollup.OutputChunk) {
   return normalizeViteClientChunk(chunk)
+}
+
+function deserializeSerializedManifest(serialized: string): StartManifest {
+  return deserialize(serialized) as StartManifest
 }
 
 function makeChunk(options: {
@@ -669,6 +676,91 @@ describe('buildStartManifest', () => {
         },
       },
     ])
+  })
+
+  test('serializeStartManifest preserves shared asset identity across routes', () => {
+    const sharedAsset = {
+      tag: 'link' as const,
+      attrs: {
+        rel: 'stylesheet',
+        href: '/assets/shared.css',
+        type: 'text/css',
+      },
+    }
+    const manifest: StartManifest = {
+      routes: {
+        __root__: {
+          children: ['/a', '/b', '/c'],
+        },
+        '/a': { assets: [sharedAsset], preloads: ['/assets/a.js'] },
+        '/b': { assets: [sharedAsset], preloads: ['/assets/b.js'] },
+        '/c': { assets: [sharedAsset], preloads: ['/assets/c.js'] },
+      },
+      clientEntry: '/assets/entry.js',
+    }
+
+    const evaluated = deserializeSerializedManifest(
+      serializeStartManifest(manifest),
+    )
+
+    const aAsset = evaluated.routes['/a']?.assets?.[0]
+    const bAsset = evaluated.routes['/b']?.assets?.[0]
+    const cAsset = evaluated.routes['/c']?.assets?.[0]
+
+    expect(aAsset).toBeDefined()
+    expect(aAsset).toBe(bAsset)
+    expect(bAsset).toBe(cAsset)
+  })
+
+  test('serializeStartManifest preserves non-asset fields unchanged', () => {
+    const manifest: StartManifest = {
+      routes: {
+        __root__: {
+          children: ['/posts'],
+          preloads: ['/assets/root.js'],
+        },
+        '/posts': {
+          filePath: '/routes/posts.tsx',
+          children: ['/posts/$postId'],
+          preloads: ['/assets/posts.js'],
+          assets: [
+            {
+              tag: 'script' as const,
+              attrs: {
+                src: '/assets/posts.js',
+                type: 'module',
+              },
+              children: 'console.log("posts")',
+            },
+          ],
+        },
+      },
+      clientEntry: '/assets/entry.js',
+    }
+
+    expect(
+      deserializeSerializedManifest(serializeStartManifest(manifest)),
+    ).toEqual(manifest)
+  })
+
+  test('serializeStartManifest handles manifests without route assets', () => {
+    const manifest: StartManifest = {
+      routes: {
+        __root__: {
+          children: ['/posts'],
+          preloads: ['/assets/root.js'],
+        },
+        '/posts': {
+          filePath: '/routes/posts.tsx',
+          preloads: ['/assets/posts.js'],
+        },
+      },
+      clientEntry: '/assets/entry.js',
+    }
+
+    expect(
+      deserializeSerializedManifest(serializeStartManifest(manifest)),
+    ).toEqual(manifest)
   })
 })
 
