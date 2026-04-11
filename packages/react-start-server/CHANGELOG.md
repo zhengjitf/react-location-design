@@ -1,5 +1,15 @@
 # @tanstack/react-start-server
 
+## 1.166.31
+
+### Patch Changes
+
+- fix publishing ([`f8ac427`](https://github.com/TanStack/router/commit/f8ac427000c3fec99225926e72f9f2fc7a37231f))
+
+- Updated dependencies [[`f8ac427`](https://github.com/TanStack/router/commit/f8ac427000c3fec99225926e72f9f2fc7a37231f)]:
+  - @tanstack/start-server-core@1.167.13
+  - @tanstack/start-client-core@1.167.11
+
 ## 1.166.30
 
 ### Patch Changes

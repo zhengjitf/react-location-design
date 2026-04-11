@@ -1,5 +1,11 @@
 # @tanstack/start-client-core
 
+## 1.167.11
+
+### Patch Changes
+
+- fix publishing ([`f8ac427`](https://github.com/TanStack/router/commit/f8ac427000c3fec99225926e72f9f2fc7a37231f))
+
 ## 1.167.10
 
 ### Patch Changes
