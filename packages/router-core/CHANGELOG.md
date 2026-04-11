@@ -1,5 +1,13 @@
 # @tanstack/router-core
 
+## 1.168.13
+
+### Patch Changes
+
+- Reduce React Start SSR manifest payload size by omitting unmatched route assets from dehydrated router state while keeping start-manifest asset serialization deduplicated by shared object identity. ([#7157](https://github.com/TanStack/router/pull/7157))
+
+  This improves SSR HTML size for apps with many routes that share the same CSS assets and adds regression coverage for CSS module hydration, navigation, and start-manifest asset reuse.
+
 ## 1.168.12
 
 ### Patch Changes
