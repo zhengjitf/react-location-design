@@ -1,6 +1,11 @@
 import * as template from '@babel/template'
 import { createHmrHotExpressionAst } from './hmr-hot-expression'
-import type { AnyRoute, AnyRouteMatch, AnyRouter } from '@tanstack/router-core'
+import type {
+  AnyRoute,
+  AnyRouteMatch,
+  AnyRouter,
+  RouterWritableStore,
+} from '@tanstack/router-core'
 
 type AnyRouteWithPrivateProps = AnyRoute & {
   options: Record<string, unknown>
@@ -19,21 +24,15 @@ type AnyRouterWithPrivateMaps = AnyRouter & {
   stores: AnyRouter['stores'] & {
     cachedMatchStoresById: Map<
       string,
-      {
-        setState: (updater: (prev: AnyRouteMatch) => AnyRouteMatch) => void
-      }
+      Pick<RouterWritableStore<AnyRouteMatch>, 'set'>
     >
     pendingMatchStoresById: Map<
       string,
-      {
-        setState: (updater: (prev: AnyRouteMatch) => AnyRouteMatch) => void
-      }
+      Pick<RouterWritableStore<AnyRouteMatch>, 'set'>
     >
     activeMatchStoresById: Map<
       string,
-      {
-        setState: (updater: (prev: AnyRouteMatch) => AnyRouteMatch) => void
-      }
+      Pick<RouterWritableStore<AnyRouteMatch>, 'set'>
     >
   }
 }
@@ -96,9 +95,9 @@ function handleRouteUpdate(
   walkReplaceSegmentTree(oldRoute, router.processedTree.segmentTree)
 
   const filter = (m: AnyRouteMatch) => m.routeId === oldRoute.id
-  const activeMatch = router.stores.activeMatchesSnapshot.state.find(filter)
-  const pendingMatch = router.stores.pendingMatchesSnapshot.state.find(filter)
-  const cachedMatches = router.stores.cachedMatchesSnapshot.state.filter(filter)
+  const activeMatch = router.stores.activeMatchesSnapshot.get().find(filter)
+  const pendingMatch = router.stores.pendingMatchesSnapshot.get().find(filter)
+  const cachedMatches = router.stores.cachedMatchesSnapshot.get().filter(filter)
 
   if (activeMatch || pendingMatch || cachedMatches.length > 0) {
     // Clear stale match data for removed route options BEFORE invalidating.
@@ -122,7 +121,7 @@ function handleRouteUpdate(
             router.stores.activeMatchStoresById.get(matchId) ||
             router.stores.cachedMatchStoresById.get(matchId)
           if (store) {
-            store.setState((prev) => {
+            store.set((prev) => {
               const next: AnyRouteMatchWithPrivateProps = { ...prev }
 
               if (removedKeys.has('loader')) {
