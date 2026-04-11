@@ -1,5 +1,13 @@
 # @tanstack/react-start
 
+## 1.167.28
+
+### Patch Changes
+
+- Updated dependencies [[`d3f20fb`](https://github.com/TanStack/router/commit/d3f20fbe7acf69c3bd108c5ddc9748ad47690b04)]:
+  - @tanstack/start-plugin-core@1.167.25
+  - @tanstack/react-start-rsc@0.0.8
+
 ## 1.167.27
 
 ### Patch Changes

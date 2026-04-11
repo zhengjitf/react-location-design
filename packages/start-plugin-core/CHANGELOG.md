@@ -1,5 +1,13 @@
 # @tanstack/start-plugin-core
 
+## 1.167.25
+
+### Patch Changes
+
+- Reuse previously discovered server function IDs across compiler instances so custom `generateFunctionId` values stay stable when duplicate IDs are deduplicated during build. ([#7153](https://github.com/TanStack/router/pull/7153))
+
+  This fixes cases where different build environments could assign different deduped IDs to the same server functions, which could cause requests to resolve to the wrong handler.
+
 ## 1.167.24
 
 ### Patch Changes
