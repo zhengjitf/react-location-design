@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.12
+
+### Patch Changes
+
+- avoid false notFound matches for proxied loader data ([#7156](https://github.com/TanStack/router/pull/7156))
+
 ## 1.168.11
 
 ### Patch Changes
