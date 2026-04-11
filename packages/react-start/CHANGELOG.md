@@ -1,5 +1,17 @@
 # @tanstack/react-start
 
+## 1.167.24
+
+### Patch Changes
+
+- fix publishing ([`2d53c05`](https://github.com/TanStack/router/commit/2d53c056ef0b203de8a28bc92c24e8e604205d52))
+
+- Updated dependencies [[`2d53c05`](https://github.com/TanStack/router/commit/2d53c056ef0b203de8a28bc92c24e8e604205d52)]:
+  - @tanstack/start-server-core@1.167.12
+  - @tanstack/start-plugin-core@1.167.21
+  - @tanstack/react-start-server@1.166.30
+  - @tanstack/react-start-rsc@0.0.4
+
 ## 1.167.22
 
 ### Patch Changes
