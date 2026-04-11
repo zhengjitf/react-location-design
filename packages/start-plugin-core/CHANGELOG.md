@@ -1,5 +1,11 @@
 # @tanstack/start-plugin-core
 
+## 1.167.19
+
+### Patch Changes
+
+- Republish the React Start RSC package chain so fresh installs resolve a `start-plugin-core` build that exports the subpaths used by `react-start-rsc`. ([`3384abc`](https://github.com/TanStack/router/commit/3384abcffd98a68eb254b11221834bcbcdebec31))
+
 ## 1.167.18
 
 ### Patch Changes
