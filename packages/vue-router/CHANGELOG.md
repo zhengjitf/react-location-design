@@ -1,5 +1,14 @@
 # @tanstack/vue-router
 
+## 1.168.14
+
+### Patch Changes
+
+- shorten internal non-minifiable store names for byte shaving ([#7152](https://github.com/TanStack/router/pull/7152))
+
+- Updated dependencies [[`6355bb7`](https://github.com/TanStack/router/commit/6355bb75f7637ba77f06a923c18fdaf37720bb48)]:
+  - @tanstack/router-core@1.168.11
+
 ## 1.168.13
 
 ### Patch Changes
