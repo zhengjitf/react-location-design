@@ -38,6 +38,7 @@ overrides:
   '@tanstack/valibot-adapter': workspace:*
   '@tanstack/arktype-adapter': workspace:*
   '@tanstack/react-start': workspace:*
+  '@tanstack/react-start-rsc': workspace:*
   '@tanstack/react-start-client': workspace:*
   '@tanstack/react-start-server': workspace:*
   '@tanstack/solid-start': workspace:*
@@ -9296,9 +9297,6 @@ importers:
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.37.0)(tsx@4.20.3)(yaml@2.8.1)
-      vite-tsconfig-paths:
-        specifier: ^5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@8.0.0(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.37.0)(tsx@4.20.3)(yaml@2.8.1))
 
   examples/react/start-streaming-data-from-server-functions:
     dependencies:
@@ -25829,14 +25827,6 @@ packages:
       '@testing-library/jest-dom':
         optional: true
 
-  vite-tsconfig-paths@5.1.4:
-    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
-    peerDependencies:
-      vite: ^8.0.0
-    peerDependenciesMeta:
-      vite:
-        optional: true
-
   vite-tsconfig-paths@6.1.1:
     resolution: {integrity: sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg==}
     peerDependencies:
@@ -39818,10 +39808,6 @@ snapshots:
 
   ts-pattern@5.6.2: {}
 
-  tsconfck@3.1.4(typescript@5.9.3):
-    optionalDependencies:
-      typescript: 5.9.3
-
   tsconfck@3.1.4(typescript@6.0.2):
     optionalDependencies:
       typescript: 6.0.2
@@ -40272,17 +40258,6 @@ snapshots:
       '@testing-library/jest-dom': 6.6.3
     transitivePeerDependencies:
       - supports-color
-
-  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@8.0.0(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.37.0)(tsx@4.20.3)(yaml@2.8.1)):
-    dependencies:
-      debug: 4.4.3
-      globrex: 0.1.2
-      tsconfck: 3.1.4(typescript@5.9.3)
-    optionalDependencies:
-      vite: 8.0.0(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.37.0)(tsx@4.20.3)(yaml@2.8.1)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   vite-tsconfig-paths@6.1.1(typescript@6.0.2)(vite@8.0.0(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(sass-embedded@1.97.2)(sass@1.97.2)(terser@5.37.0)(tsx@4.20.3)(yaml@2.8.1)):
     dependencies:
