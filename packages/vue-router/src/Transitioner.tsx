@@ -36,21 +36,16 @@ export function useTransitionerSetup() {
   const isTransitioning = Vue.ref(false)
 
   // Track pending state changes
-  const hasPendingMatches = useStore(
-    router.stores.hasPendingMatches,
-    (value) => value,
-  )
+  const hasPending = useStore(router.stores.hasPending, (value) => value)
 
   const previousIsLoading = usePrevious(() => isLoading.value)
 
   const isAnyPending = Vue.computed(
-    () => isLoading.value || isTransitioning.value || hasPendingMatches.value,
+    () => isLoading.value || isTransitioning.value || hasPending.value,
   )
   const previousIsAnyPending = usePrevious(() => isAnyPending.value)
 
-  const isPagePending = Vue.computed(
-    () => isLoading.value || hasPendingMatches.value,
-  )
+  const isPagePending = Vue.computed(() => isLoading.value || hasPending.value)
   const previousIsPagePending = usePrevious(() => isPagePending.value)
 
   // Implement startTransition similar to React/Solid
