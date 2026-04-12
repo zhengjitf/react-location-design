@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.18
+
+### Patch Changes
+
+- add vite 8 to peer deps ([#7160](https://github.com/TanStack/router/pull/7160))
+
 ## 1.167.17
 
 ### Patch Changes
