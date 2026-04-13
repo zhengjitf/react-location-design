@@ -1,5 +1,13 @@
 # @tanstack/react-start
 
+## 1.167.37
+
+### Patch Changes
+
+- Fix `@tanstack/react-start/server` imports inside React Server Components by adding a `react-server` export condition that resolves to the request/response APIs without pulling in the SSR renderer entrypoints. ([#7180](https://github.com/TanStack/router/pull/7180))
+
+  This fixes RSC routes that call `createServerFn` loaders and read request headers in dev with `@vitejs/plugin-rsc` enabled.
+
 ## 1.167.36
 
 ### Patch Changes
