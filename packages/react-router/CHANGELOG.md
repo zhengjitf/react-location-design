@@ -1,5 +1,13 @@
 # @tanstack/react-router
 
+## 1.168.19
+
+### Patch Changes
+
+- Fix route file transforms to preserve route ID quoting, handle more exported `Route` patterns, and avoid incorrect import rewrites in edge cases. ([#7167](https://github.com/TanStack/router/pull/7167))
+
+  Improve transform robustness with clearer route-call detection, safer import removal, and expanded test coverage for quote preservation, constructor swaps, and unsupported route definitions.
+
 ## 1.168.18
 
 ### Patch Changes
