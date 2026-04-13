@@ -1,5 +1,13 @@
 # @tanstack/react-router
 
+## 1.168.20
+
+### Patch Changes
+
+- Fix React Server Component imports from `@tanstack/react-router` by adding a `react-server` root export that preserves the normal API surface while resolving `notFound` and `redirect` from a server-safe entry. ([#7183](https://github.com/TanStack/router/pull/7183))
+
+  This fixes RSC routes that throw `notFound()` or `redirect()` from server functions so they behave correctly during SSR and client navigation.
+
 ## 1.168.19
 
 ### Patch Changes
