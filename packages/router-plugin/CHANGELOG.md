@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.20
+
+### Patch Changes
+
+- fix: update vite-plugin-solid peer dependency to support version 3.0.0-0 ([#7170](https://github.com/TanStack/router/pull/7170))
+
 ## 1.167.19
 
 ### Patch Changes
