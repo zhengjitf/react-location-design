@@ -1,5 +1,11 @@
 # @tanstack/router-generator
 
+## 1.166.31
+
+### Patch Changes
+
+- Fix malformed generated paths when a `physical()` mount points at a subtree rooted by `__virtual.ts`, including nested virtual layouts that mount additional physical routes. ([#7169](https://github.com/TanStack/router/pull/7169))
+
 ## 1.166.30
 
 ### Patch Changes
