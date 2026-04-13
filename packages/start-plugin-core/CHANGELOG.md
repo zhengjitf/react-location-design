@@ -1,5 +1,13 @@
 # @tanstack/start-plugin-core
 
+## 1.167.33
+
+### Patch Changes
+
+- Fix Start virtual module resolution in pnpm workspaces by serving the client entry through a real Vite virtual module. ([#7178](https://github.com/TanStack/router/pull/7178))
+
+  Simplify Start virtual module handling by sharing a single `createVirtualModule` helper and collapsing internal `@tanstack/start-plugin-core` imports to the root export surface.
+
 ## 1.167.32
 
 ### Patch Changes
