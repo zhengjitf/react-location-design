@@ -2,14 +2,16 @@ import {
   START_ENVIRONMENT_NAMES,
   tanStackStartVite,
 } from '@tanstack/start-plugin-core'
+import type {
+  TanStackStartViteInputConfig,
+  TanStackStartVitePluginCoreOptions,
+} from '@tanstack/start-plugin-core'
 import {
   configureRsc,
   reactStartRscVitePlugin,
 } from '@tanstack/react-start-rsc/plugin/vite'
 import path from 'pathe'
 import { reactStartDefaultEntryPaths, reactStartPluginDir } from './shared'
-import type { TanStackStartVitePluginCoreOptions } from '@tanstack/start-plugin-core/vite/types'
-import type { TanStackStartViteInputConfig } from '@tanstack/start-plugin-core'
 import type { PluginOption } from 'vite'
 
 const isInsideRouterMonoRepo =
