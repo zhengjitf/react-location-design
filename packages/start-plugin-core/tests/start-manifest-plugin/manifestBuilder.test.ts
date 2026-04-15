@@ -389,6 +389,69 @@ describe('createChunkCssAssetCollector', () => {
 })
 
 describe('buildStartManifest', () => {
+  test('allows callers to attach additional route assets', () => {
+    const entryChunk = makeChunk({
+      fileName: 'entry.js',
+      isEntry: true,
+      moduleIds: ['/src/entry.tsx'],
+    })
+
+    const assetResolvers = createManifestAssetResolvers('/assets')
+
+    const manifest = buildStartManifest({
+      clientBuild: normalizeViteClientBuild({
+        'entry.js': entryChunk,
+      }),
+      routeTreeRoutes: {
+        __root__: { children: ['/about'] } as any,
+        '/about': { filePath: '/routes/about.tsx' },
+      },
+      basePath: '/assets',
+      additionalRouteAssets: {
+        __root__: [assetResolvers.getStylesheetAsset('style.css')],
+      },
+    })
+
+    expect(manifest.routes.__root__!.assets).toEqual([
+      {
+        tag: 'link',
+        attrs: {
+          rel: 'stylesheet',
+          href: '/assets/style.css',
+          type: 'text/css',
+        },
+      },
+    ])
+  })
+
+  test('rejects additional route assets for unknown route ids', () => {
+    const entryChunk = makeChunk({
+      fileName: 'entry.js',
+      isEntry: true,
+      moduleIds: ['/src/entry.tsx'],
+    })
+
+    const assetResolvers = createManifestAssetResolvers('/assets')
+
+    expect(() =>
+      buildStartManifest({
+        clientBuild: normalizeViteClientBuild({
+          'entry.js': entryChunk,
+        }),
+        routeTreeRoutes: {
+          __root__: { children: ['/about'] } as any,
+          '/about': { filePath: '/routes/about.tsx' },
+        },
+        basePath: '/assets',
+        additionalRouteAssets: {
+          '/missing': [assetResolvers.getStylesheetAsset('style.css')],
+        },
+      }),
+    ).toThrow(
+      'expected additionalRouteAssets routeId to exist in routeTreeRoutes: /missing',
+    )
+  })
+
   test('dedupes route css gathered through overlapping chunk imports', () => {
     const entryChunk = makeChunk({
       fileName: 'entry.js',
