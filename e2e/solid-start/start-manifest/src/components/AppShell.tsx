@@ -1,4 +1,5 @@
-import { ClientOnly, Link, Outlet, linkOptions } from '@tanstack/react-router'
+/// <reference types="vite/client" />
+import { ClientOnly, Link, Outlet, linkOptions } from '@tanstack/solid-router'
 import styles from '~/styles/root-shell.module.css'
 
 const ROUTES = linkOptions([
@@ -14,17 +15,17 @@ const ROUTES = linkOptions([
 
 export function AppShell() {
   return (
-    <div className={styles.shell}>
-      <nav className={styles.nav}>
+    <div class={styles.shell}>
+      <nav class={styles.nav}>
         {ROUTES.map((route) => (
-          <Link key={route.to} {...route} data-testid={`nav-${route.label}`}>
+          <Link {...route} data-testid={`nav-${route.label}`}>
             {route.label}
           </Link>
         ))}
       </nav>
 
-      <main className={styles.content}>
-        <div className={styles.rootBadge} data-testid="root-shell-marker">
+      <main class={styles.content}>
+        <div class={styles.rootBadge} data-testid="root-shell-marker">
           Start manifest CSS root shell
         </div>
         <ClientOnly>

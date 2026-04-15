@@ -47,11 +47,11 @@ function countMatchingStylesheetHrefs(hrefs: Array<string>, pattern: string) {
 }
 
 async function loadBuiltStartManifest() {
-  const serverDir = path.resolve(import.meta.dirname, '../.output/server')
+  const serverDir = path.resolve(import.meta.dirname, '../dist/server/assets')
   const entries = await readdir(serverDir)
   const manifestFile = entries.find(
     (entry) =>
-      entry.startsWith('_tanstack-start-manifest_v-') && entry.endsWith('.mjs'),
+      entry.startsWith('_tanstack-start-manifest_v-') && entry.endsWith('.js'),
   )
 
   expect(manifestFile).toBeTruthy()
@@ -440,7 +440,7 @@ test('shared widget CSS persists after navigating away from lazy and back', asyn
   await expect(page.getByTestId('shared-widget')).toBeVisible()
 
   await page.getByTestId('nav-home').click()
-  await page.waitForURL((url) => url.pathname === '/')
+  await page.waitForURL(/\/([^/]*)(\/)?($|\?)/)
 
   await page.getByTestId('nav-/lazy-css-lazy').click()
   await page.waitForURL('**/lazy-css-lazy')
