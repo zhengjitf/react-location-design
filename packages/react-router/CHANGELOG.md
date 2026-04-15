@@ -1,5 +1,11 @@
 # @tanstack/react-router
 
+## 1.168.22
+
+### Patch Changes
+
+- Preserve shared route stylesheet links across client navigation by rendering route CSS assets with React stylesheet precedence. ([#7186](https://github.com/TanStack/router/pull/7186))
+
 ## 1.168.21
 
 ### Patch Changes
