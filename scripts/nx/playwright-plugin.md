@@ -1,40 +1,98 @@
-# Playwright E2E Sharding
+# Playwright E2E Inference (Modes + Shards)
 
-Use `scripts/nx/playwright-plugin.ts` to turn a Playwright e2e project into Nx shard targets.
+Use `scripts/nx/playwright-plugin.ts` to infer Playwright e2e targets from
+`package.json` metadata.
 
-The plugin looks for `nx.metadata.playwrightShards` in a project's `package.json`. When present, it generates:
+The plugin supports two metadata styles:
 
-- `test:e2e--shard-1-of-N` through `test:e2e--shard-N-of-N`
-- a parent `test:e2e` target that depends on all shard targets
+- `nx.metadata.playwrightModes` (recommended)
+- `nx.metadata.playwrightShards` (legacy, still supported)
 
-Each shard target runs Playwright with:
+When `playwrightModes` is present, it takes precedence.
 
-- `--shard=<index>/<count>`
-- a shard-specific `E2E_PORT_KEY`
-- a dependency on `build` and `^build`
-
-## 1. Enable sharding in `package.json`
+## 1. Configure `playwrightModes` in `package.json`
 
 ```json
 {
-  "name": "tanstack-react-start-e2e-rsc",
+  "name": "tanstack-react-start-e2e-basic",
   "nx": {
     "metadata": {
-      "playwrightShards": 6
+      "playwrightModes": [
+        { "toolchain": "vite", "mode": "ssr" },
+        { "toolchain": "vite", "mode": "spa", "shards": 4 },
+        { "toolchain": "vite", "mode": "prerender", "shards": 4 },
+        { "toolchain": "vite", "mode": "preview" }
+      ]
     }
   }
 }
 ```
 
-The package name is used to build the shard port key:
+Supported modes:
 
-```txt
-<package-name>-shard-<index>-of-<count>
+- `ssr`
+- `spa`
+- `prerender`
+- `preview`
+
+`shards` is optional and defaults to `1`.
+
+Supported toolchains:
+
+- `vite`
+
+## 2. What targets are generated
+
+For each `{ toolchain, mode }` entry, the plugin generates:
+
+- `build:e2e--<toolchain>-<mode>`
+- `test:e2e--<toolchain>-<mode>`
+
+If `shards > 1`, it also generates:
+
+- `test:e2e--<toolchain>-<mode>--shard-1-of-N` ... `--shard-N-of-N`
+- `test:e2e--<toolchain>-<mode>` as a parent noop target depending on all shards
+
+Finally, it generates:
+
+- `test:e2e` as a parent noop target depending on every mode target
+
+## 3. Environment variables injected by inferred targets
+
+Each inferred `build:e2e:*` and `test:e2e:*` target sets:
+
+- `MODE=<mode>`
+- `TOOLCHAIN=<toolchain>`
+- `E2E_TOOLCHAIN=<toolchain>`
+- `E2E_DIST=dist-<toolchain>-<mode>`
+- `E2E_DIST_DIR=dist-<toolchain>-<mode>`
+
+Each inferred `test:e2e:*` target also sets:
+
+- `E2E_PORT_KEY=<package-name>-<toolchain>-<mode>`
+- For shard targets: `E2E_PORT_KEY=<package-name>-<toolchain>-<mode>-shard-<index>-of-<count>`
+
+## 4. Build behavior and webServer command
+
+Each inferred e2e target depends on the inferred `build:e2e--<toolchain>-<mode>`
+target, which runs:
+
+```sh
+vite build && tsc --noEmit
 ```
 
-## 2. Do not build inside `playwright.config.ts`
+with the mode/toolchain env above.
 
-The plugin already makes each shard depend on `build`, so the Playwright `webServer` command should only start the built app.
+This command is intentionally fixed (it does not call `pnpm build`). This avoids
+accidentally selecting the wrong build path in projects that include multiple
+toolchains.
+
+The inferred build target uses standard production inputs and explicit mode-
+specific outputs (`dist-<toolchain>-<mode>`). Mode env values are passed through
+the target command env, so they do not need to be duplicated as target input
+env hashes.
+
+Because of this, Playwright `webServer.command` should only start the app.
 
 Good:
 
@@ -45,22 +103,31 @@ webServer: {
 }
 ```
 
-Avoid:
+For preview mode, pass the inferred dist folder:
 
 ```ts
+const distDir = process.env.E2E_DIST_DIR ?? 'dist'
+
 webServer: {
-  command: `PORT=${PORT} pnpm build && PORT=${PORT} pnpm start`,
+  command: `pnpm preview --outDir ${distDir} --port ${PORT}`,
   url: baseURL,
 }
 ```
 
-Running the build inside every shard causes unnecessary work and can create races when multiple shards share the same project directory.
+Avoid:
 
-## 3. Use `E2E_PORT_KEY` for every derived port
+```ts
+webServer: {
+  command: `MODE=spa pnpm build && PORT=${PORT} pnpm start`,
+  url: baseURL,
+}
+```
 
-If the project uses `getTestServerPort`, `getDummyServerPort`, `e2eStartDummyServer`, or `e2eStopDummyServer`, key them off `process.env.E2E_PORT_KEY` first.
+## 5. Use `E2E_PORT_KEY` for all server ports
 
-Example:
+If your setup uses `getTestServerPort`, `getDummyServerPort`,
+`e2eStartDummyServer`, or `e2eStopDummyServer`, use
+`process.env.E2E_PORT_KEY` first.
 
 ```ts
 import { getTestServerPort } from '@tanstack/router-e2e-utils'
@@ -77,15 +144,14 @@ await e2eStartDummyServer(process.env.E2E_PORT_KEY ?? packageJson.name)
 await e2eStopDummyServer(process.env.E2E_PORT_KEY ?? packageJson.name)
 ```
 
-Without this, multiple shards on the same runner will reuse the same `port-*.txt` files and tear each other down.
+## 6. Clean stale port files once per Playwright run
 
-## 4. Clean stale port files once per Playwright run
+If the project allocates ports through `@tanstack/router-e2e-utils`, clean stale
+`port-*.txt` files before resolving the port.
 
-If the project allocates ports through `@tanstack/router-e2e-utils`, clean stale `port-*.txt` files before resolving the port.
-
-Important: do this only in the main Playwright config load. Playwright loads the config more than once, and unconditional cleanup can remap the port after the web server has already started.
-
-Example:
+Important: do this only in the main Playwright config load. Playwright loads the
+config more than once, and unconditional cleanup can remap the port after the
+web server has already started.
 
 ```ts
 import fs from 'node:fs'
@@ -96,6 +162,7 @@ const e2ePortKey = process.env.E2E_PORT_KEY ?? packageJson.name
 if (process.env.TEST_WORKER_INDEX === undefined) {
   for (const portFile of [
     `port-${e2ePortKey}.txt`,
+    `port-${e2ePortKey}_start.txt`,
     `port-${e2ePortKey}-external.txt`,
   ]) {
     fs.rmSync(portFile, { force: true })
@@ -103,49 +170,34 @@ if (process.env.TEST_WORKER_INDEX === undefined) {
 }
 ```
 
+Include the `*_start` file only if your test setup allocates a separate
+`START_PORT` key.
+
 Avoid broad cleanup such as `rm -rf port*.txt` in shared shard runs.
 
-## 5. Keep the base URL derived from the shard key
-
-```ts
-const PORT = await getTestServerPort(e2ePortKey)
-const baseURL = `http://localhost:${PORT}`
-
-export default defineConfig({
-  use: {
-    baseURL,
-  },
-  webServer: {
-    command: `PORT=${PORT} pnpm start`,
-    url: baseURL,
-  },
-})
-```
-
-## 6. Run the generated targets
+## 7. Run inferred targets
 
 Examples:
 
 ```sh
-pnpm nx run tanstack-react-start-e2e-rsc:test:e2e--shard-1-of-6
-pnpm nx run tanstack-react-start-e2e-rsc:test:e2e
+pnpm nx run tanstack-react-start-e2e-basic:test:e2e--vite-ssr
+pnpm nx run tanstack-react-start-e2e-basic:test:e2e--vite-spa--shard-1-of-4
+pnpm nx run tanstack-react-start-e2e-basic:test:e2e
 ```
 
-## Checklist
+## Legacy fallback: `playwrightShards`
 
-- add `nx.metadata.playwrightShards` to `package.json`
-- make sure the project has a working `build` target
-- remove `build` from `webServer.command`
-- read ports from `process.env.E2E_PORT_KEY ?? packageJson.name`
-- use the same key for helper servers in setup and teardown
-- clean shard-specific `port-*.txt` files once, guarded by `TEST_WORKER_INDEX === undefined`
-- avoid wildcard port cleanup in shared shard runs
+If `playwrightModes` is not configured, the plugin still supports:
 
-## Reference
+```json
+{
+  "nx": {
+    "metadata": {
+      "playwrightShards": 6
+    }
+  }
+}
+```
 
-Working example:
-
-- `e2e/react-start/rsc/package.json`
-- `e2e/react-start/rsc/playwright.config.ts`
-- `e2e/react-start/rsc/tests/setup/global.setup.ts`
-- `e2e/react-start/rsc/tests/setup/global.teardown.ts`
+This generates legacy shard targets under `test:e2e--shard-...` plus a parent
+`test:e2e` target.
