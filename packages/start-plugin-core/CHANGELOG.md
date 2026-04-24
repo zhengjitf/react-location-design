@@ -1,5 +1,18 @@
 # @tanstack/start-plugin-core
 
+## 1.168.0
+
+### Minor Changes
+
+- rsbuild ([#7228](https://github.com/TanStack/router/pull/7228))
+
+### Patch Changes
+
+- Updated dependencies [[`91a7089`](https://github.com/TanStack/router/commit/91a708989d00537a21911e74ff60bbfec8266295)]:
+  - @tanstack/router-plugin@1.167.23
+  - @tanstack/router-utils@1.161.7
+  - @tanstack/router-generator@1.166.33
+
 ## 1.167.35
 
 ### Patch Changes
