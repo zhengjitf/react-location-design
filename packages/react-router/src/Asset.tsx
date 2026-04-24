@@ -216,6 +216,7 @@ function Script({
     if (attrs?.src) {
       return <script {...attrs} suppressHydrationWarning />
     }
+
     if (typeof children === 'string') {
       return (
         <script

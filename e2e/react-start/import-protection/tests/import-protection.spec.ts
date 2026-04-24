@@ -5,6 +5,8 @@ import { test } from '@tanstack/router-e2e-utils'
 import type { Violation } from './violations.utils'
 import type { Page } from '@playwright/test'
 
+const toolchain = process.env.E2E_TOOLCHAIN ?? 'vite'
+
 async function readViolations(
   type: 'build' | 'dev' | 'dev.cold' | 'dev.warm',
 ): Promise<Array<Violation>> {
@@ -38,6 +40,39 @@ function findClientSecretServerFileViolation(
       v.importer.includes(importerFragment) &&
       (specifierMatches(v.specifier) ||
         v.resolved?.includes('violations/secret.server')),
+  )
+}
+
+function findBarrelReexportHits(
+  violations: Array<Violation>,
+): Array<Violation> {
+  return violations.filter(
+    (v) =>
+      v.envType === 'client' &&
+      (v.importer.includes('barrel-reexport') ||
+        v.importer.includes('barrel-false-positive') ||
+        v.specifier.includes('db.server') ||
+        v.resolved?.includes('barrel-reexport') ||
+        v.trace.some(
+          (s) =>
+            s.file.includes('barrel-reexport') ||
+            s.file.includes('barrel-false-positive'),
+        )),
+  )
+}
+
+function findBarrelMarkerHits(violations: Array<Violation>): Array<Violation> {
+  return violations.filter(
+    (v) =>
+      v.envType === 'client' &&
+      (v.specifier.includes('server-only') ||
+        v.specifier.includes('foo') ||
+        v.resolved?.includes('foo')) &&
+      v.trace.some(
+        (s) =>
+          s.file.includes('barrel-reexport') ||
+          s.file.includes('barrel-false-positive'),
+      ),
   )
 }
 
@@ -240,7 +275,7 @@ for (const mode of ['build', 'dev'] as const) {
         x.envType === 'client' &&
         (x.specifier.includes('secret.server') ||
           x.resolved?.includes('secret.server')) &&
-        !!x.snippet,
+        x.snippet?.lines.join('\n').includes('getSecret'),
     )
     expect(v).toBeDefined()
     expect(v!.snippet).toBeDefined()
@@ -669,7 +704,8 @@ for (const mode of ['build', 'dev', 'dev.warm'] as const) {
 // never imports foo at all. Both the .server module and the marker module
 // should NOT survive tree-shaking in the client bundle, so import-protection
 // must NOT flag violations for either in build mode.
-// In dev mode there is no tree-shaking so the violation is expected (mock).
+// Dev behavior is not part of this contract because barrel re-export diagnostics
+// can warn or be elided depending on dev transform/chunk graph ordering.
 
 test('barrel-false-positive route loads in mock mode', async ({ page }) => {
   await page.goto('/barrel-false-positive')
@@ -681,21 +717,7 @@ test('barrel-false-positive route loads in mock mode', async ({ page }) => {
 test('no false positive for barrel-reexport .server pattern in build', async () => {
   const violations = await readViolations('build')
 
-  const barrelHits = violations.filter(
-    (v) =>
-      v.envType === 'client' &&
-      (v.importer.includes('barrel-reexport') ||
-        v.importer.includes('barrel-false-positive') ||
-        v.specifier.includes('db.server') ||
-        v.resolved?.includes('barrel-reexport') ||
-        v.trace.some(
-          (s) =>
-            s.file.includes('barrel-reexport') ||
-            s.file.includes('barrel-false-positive'),
-        )),
-  )
-
-  expect(barrelHits).toEqual([])
+  expect(findBarrelReexportHits(violations)).toEqual([])
 })
 
 test('no false positive for barrel-reexport marker pattern in build', async () => {
@@ -704,20 +726,7 @@ test('no false positive for barrel-reexport marker pattern in build', async () =
   // foo.ts uses `import '@tanstack/react-start/server-only'` marker and is
   // re-exported through the barrel, but never imported by the route.
   // Tree-shaking should eliminate it — no marker violation should fire.
-  const markerHits = violations.filter(
-    (v) =>
-      v.envType === 'client' &&
-      (v.specifier.includes('server-only') ||
-        v.specifier.includes('foo') ||
-        v.resolved?.includes('foo')) &&
-      v.trace.some(
-        (s) =>
-          s.file.includes('barrel-reexport') ||
-          s.file.includes('barrel-false-positive'),
-      ),
-  )
-
-  expect(markerHits).toEqual([])
+  expect(findBarrelMarkerHits(violations)).toEqual([])
 })
 
 // noExternal .client package false positive: react-tweet's package.json

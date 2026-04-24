@@ -74,6 +74,12 @@
         "default": "./dist/esm/plugin/vite.js"
       }
     },
+    "./plugin/rsbuild": {
+      "import": {
+        "types": "./dist/esm/plugin/rsbuild.d.ts",
+        "default": "./dist/esm/plugin/rsbuild.js"
+      }
+    },
     "./server-entry": {
       "import": {
         "types": "./dist/default-entry/esm/server.d.ts",
@@ -106,23 +112,30 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
+    "@tanstack/solid-router": "workspace:*",
     "@tanstack/solid-start-client": "workspace:*",
     "@tanstack/solid-start-server": "workspace:*",
-    "@tanstack/start-plugin-core": "workspace:*",
-    "@tanstack/solid-router": "workspace:*",
     "@tanstack/start-client-core": "workspace:*",
+    "@tanstack/start-plugin-core": "workspace:*",
     "@tanstack/start-server-core": "workspace:*",
     "pathe": "^2.0.3"
   },
   "devDependencies": {
+    "@rsbuild/core": "^2.0.0",
     "@tanstack/intent": "^0.0.14",
     "@tanstack/router-utils": "workspace:*",
-    "vite": "*",
-    "@types/node": ">=20"
+    "@types/node": ">=20",
+    "vite": "*"
   },
   "peerDependencies": {
+    "@rsbuild/core": "^2.0.0",
     "solid-js": ">=1.0.0",
     "vite": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@rsbuild/core": {
+      "optional": true
+    }
   },
   "bin": {
     "intent": "./bin/intent.js"
