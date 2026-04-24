@@ -1,5 +1,11 @@
 # @tanstack/start-plugin-core
 
+## 1.169.0
+
+### Minor Changes
+
+- Split Start plugin core bundler APIs into explicit Vite and Rsbuild subpaths so projects only need the bundler they use. Mark both `vite` and `@rsbuild/core` peers as optional where Start exposes both integrations. ([#7249](https://github.com/TanStack/router/pull/7249))
+
 ## 1.168.0
 
 ### Minor Changes

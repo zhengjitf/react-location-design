@@ -1,5 +1,15 @@
 # @tanstack/react-start
 
+## 1.167.44
+
+### Patch Changes
+
+- Split Start plugin core bundler APIs into explicit Vite and Rsbuild subpaths so projects only need the bundler they use. Mark both `vite` and `@rsbuild/core` peers as optional where Start exposes both integrations. ([#7249](https://github.com/TanStack/router/pull/7249))
+
+- Updated dependencies [[`dda463c`](https://github.com/TanStack/router/commit/dda463c8b571519165d3adbc337db7a0b8be1072)]:
+  - @tanstack/start-plugin-core@1.169.0
+  - @tanstack/react-start-rsc@0.0.23
+
 ## 1.167.43
 
 ### Patch Changes
