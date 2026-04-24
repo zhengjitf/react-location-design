@@ -1,5 +1,11 @@
 # @tanstack/start-plugin-core
 
+## 1.169.1
+
+### Patch Changes
+
+- Fix CSS asset ordering so styles from imported chunks are emitted before route chunk styles. ([#7251](https://github.com/TanStack/router/pull/7251))
+
 ## 1.169.0
 
 ### Minor Changes
