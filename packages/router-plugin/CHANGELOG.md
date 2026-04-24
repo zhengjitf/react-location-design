@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.25
+
+### Patch Changes
+
+- Fix React route HMR for webpack and rspack so it no longer imports `react-refresh/runtime`, avoiding failures when that optional dependency is not installed. ([#7255](https://github.com/TanStack/router/pull/7255))
+
 ## 1.167.24
 
 ### Patch Changes
