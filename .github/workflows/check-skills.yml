@@ -4,15 +4,19 @@
 # updates one review PR when existing skills, artifact coverage, or workspace
 # package coverage need review.
 #
-# Triggers: pull requests touching skills/artifacts, new release published, or
-# manual workflow_dispatch.
+# Triggers: pull requests touching skills/artifacts, pushes to main affecting
+# docs/source paths, new release published, or manual workflow_dispatch.
 #
-# intent-workflow-version: 3
+# intent-workflow-version: 4
 #
 # Template variables (replaced by `intent setup`):
 #   @tanstack/router — e.g. @tanstack/query or my-workspace workspace
 
 name: Check Skills
+
+concurrency:
+  group: check-skills-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   pull_request:
@@ -21,6 +25,11 @@ on:
       - '**/skills/**'
       - '_artifacts/**'
       - '**/_artifacts/**'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'packages/*/src/**'
   release:
     types: [published]
   workflow_dispatch: {}
