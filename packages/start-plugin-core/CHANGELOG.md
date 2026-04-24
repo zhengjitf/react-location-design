@@ -1,5 +1,18 @@
 # @tanstack/start-plugin-core
 
+## 1.169.2
+
+### Patch Changes
+
+- Add TanStack Start inline CSS manifest support for SSR so route styles can be embedded in the HTML response and hydrated without duplicate stylesheet links. ([#7253](https://github.com/TanStack/router/pull/7253))
+
+- Updated dependencies [[`4d864ee`](https://github.com/TanStack/router/commit/4d864eebbd184265eabb563d326ab409c93feb17)]:
+  - @tanstack/router-core@1.168.16
+  - @tanstack/start-server-core@1.167.20
+  - @tanstack/router-generator@1.166.34
+  - @tanstack/router-plugin@1.167.24
+  - @tanstack/start-client-core@1.167.18
+
 ## 1.169.1
 
 ### Patch Changes
