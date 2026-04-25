@@ -1,5 +1,11 @@
 # @tanstack/start-client-core
 
+## 1.167.19
+
+### Patch Changes
+
+- refactor(start-client-core): use a more explicit typing to `CustomFetch` type ([#7258](https://github.com/TanStack/router/pull/7258))
+
 ## 1.167.18
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.26
+
+### Patch Changes
+
+- refactor(router-plugin): upgrade unplugin to `v3` ([#7258](https://github.com/TanStack/router/pull/7258))
+
 ## 1.167.25
 
 ### Patch Changes
