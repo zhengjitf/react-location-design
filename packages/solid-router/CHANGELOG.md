@@ -1,5 +1,13 @@
 # @tanstack/solid-router
 
+## 1.168.23
+
+### Patch Changes
+
+- Fix for useLoaderData sometimes going undefined ([#7265](https://github.com/TanStack/router/pull/7265))
+
+- Fix streaming when using Await component ([#7264](https://github.com/TanStack/router/pull/7264))
+
 ## 1.168.22
 
 ### Patch Changes
