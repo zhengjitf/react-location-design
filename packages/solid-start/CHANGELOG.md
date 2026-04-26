@@ -1,5 +1,11 @@
 # @tanstack/solid-start
 
+## 1.167.46
+
+### Patch Changes
+
+- Don't externalize `@tanstack/solid-query` during SSR to avoid duplicate `QueryClientContext` instances ([#7267](https://github.com/TanStack/router/pull/7267))
+
 ## 1.167.45
 
 ### Patch Changes
