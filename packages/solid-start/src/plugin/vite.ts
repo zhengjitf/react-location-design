@@ -25,6 +25,17 @@ export function tanstackStart(
   return [
     {
       name: 'tanstack-solid-start:config',
+      config() {
+        return {
+          ssr: {
+            noExternal: [
+              '@tanstack/solid-router-ssr-query',
+              '@tanstack/solid-query',
+              '@tanstack/solid-query-devtools',
+            ],
+          },
+        }
+      },
       configEnvironment(environmentName, options) {
         return {
           optimizeDeps:
