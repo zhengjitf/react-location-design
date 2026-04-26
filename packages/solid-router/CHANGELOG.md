@@ -1,5 +1,11 @@
 # @tanstack/solid-router
 
+## 1.168.24
+
+### Patch Changes
+
+- Fix hydration mismatch for ssr='data-only' with pendingComponent ([#7266](https://github.com/TanStack/router/pull/7266))
+
 ## 1.168.23
 
 ### Patch Changes
