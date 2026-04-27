@@ -1023,6 +1023,7 @@ type MatchStackFrame<T extends RouteLike> = {
    * If we really really need to support more than 32 segments we can switch to using a `BigInt` here. It's about 2x slower in worst case scenarios.
    */
   skipped: number
+  /** Positional bitmasks tracking which consumed URL segments matched each segment kind. */
   statics: number
   dynamics: number
   optionals: number
@@ -1066,13 +1067,12 @@ function getNodeMatch<T extends RouteLike>(
       index: 1,
       skipped: 0,
       depth: 1,
-      statics: 1,
+      statics: 0,
       dynamics: 0,
       optionals: 0,
     },
   ]
 
-  let wildcardMatch: Frame | null = null
   let bestFuzzy: Frame | null = null
   let bestMatch: Frame | null = null
 
@@ -1080,6 +1080,18 @@ function getNodeMatch<T extends RouteLike>(
     const frame = stack.pop()!
     const { node, index, skipped, depth, statics, dynamics, optionals } = frame
     let { extract, rawParams, parsedParams } = frame
+
+    // Wildcard candidates are pushed speculatively as fallbacks in case a
+    // higher-priority wildcard later fails params.parse. If a better wildcard
+    // has already validated and become bestMatch, lower-priority wildcard
+    // fallbacks cannot win anymore and should not run params.parse.
+    if (
+      node.kind === SEGMENT_TYPE_WILDCARD &&
+      node.route &&
+      !isFrameMoreSpecific(bestMatch, frame)
+    ) {
+      continue
+    }
 
     if (node.skipOnParamError) {
       const result = validateMatchParams(path, parts, frame)
@@ -1101,7 +1113,13 @@ function getNodeMatch<T extends RouteLike>(
 
     const isBeyondPath = index === partsLength
     if (isBeyondPath) {
-      if (node.route && !pathIsIndex && isFrameMoreSpecific(bestMatch, frame)) {
+      if (
+        node.route &&
+        (!pathIsIndex ||
+          node.kind === SEGMENT_TYPE_INDEX ||
+          node.kind === SEGMENT_TYPE_WILDCARD) &&
+        isFrameMoreSpecific(bestMatch, frame)
+      ) {
         bestMatch = frame
       }
       // beyond the length of the path parts, only some segment types can match
@@ -1134,7 +1152,12 @@ function getNodeMatch<T extends RouteLike>(
       if (indexValid) {
         // perfect match, no need to continue
         // this is an optimization, algorithm should work correctly without this block
-        if (statics === partsLength && !dynamics && !optionals && !skipped) {
+        if (
+          !dynamics &&
+          !optionals &&
+          !skipped &&
+          isPerfectStaticMatch(statics, partsLength)
+        ) {
           return indexFrame
         }
         if (isFrameMoreSpecific(bestMatch, indexFrame)) {
@@ -1145,8 +1168,9 @@ function getNodeMatch<T extends RouteLike>(
     }
 
     // 5. Try wildcard match
-    if (node.wildcard && isFrameMoreSpecific(wildcardMatch, frame)) {
-      for (const segment of node.wildcard) {
+    if (node.wildcard) {
+      for (let i = node.wildcard.length - 1; i >= 0; i--) {
+        const segment = node.wildcard[i]!
         const { prefix, suffix } = segment
         if (prefix) {
           if (isBeyondPath) continue
@@ -1161,26 +1185,19 @@ function getNodeMatch<T extends RouteLike>(
           const casePart = segment.caseSensitive ? end : end.toLowerCase()
           if (casePart !== suffix) continue
         }
-        // the first wildcard match is the highest priority one
-        // wildcard matches skip the stack because they cannot have children
-        const frame = {
+        // wildcard matches consume the rest of the URL and cannot have children
+        stack.push({
           node: segment,
           index: partsLength,
           skipped,
-          depth,
+          depth: depth + 1,
           statics,
           dynamics,
           optionals,
           extract,
           rawParams,
           parsedParams,
-        }
-        if (segment.skipOnParamError) {
-          const result = validateMatchParams(path, parts, frame)
-          if (!result) continue
-        }
-        wildcardMatch = frame
-        break
+        })
       }
     }
 
@@ -1222,7 +1239,7 @@ function getNodeMatch<T extends RouteLike>(
             depth: nextDepth,
             statics,
             dynamics,
-            optionals: optionals + 1,
+            optionals: optionals + segmentScore(partsLength, index),
             extract,
             rawParams,
             parsedParams,
@@ -1249,7 +1266,7 @@ function getNodeMatch<T extends RouteLike>(
           skipped,
           depth: depth + 1,
           statics,
-          dynamics: dynamics + 1,
+          dynamics: dynamics + segmentScore(partsLength, index),
           optionals,
           extract,
           rawParams,
@@ -1269,7 +1286,7 @@ function getNodeMatch<T extends RouteLike>(
           index: index + 1,
           skipped,
           depth: depth + 1,
-          statics: statics + 1,
+          statics: statics + segmentScore(partsLength, index),
           dynamics,
           optionals,
           extract,
@@ -1288,7 +1305,7 @@ function getNodeMatch<T extends RouteLike>(
           index: index + 1,
           skipped,
           depth: depth + 1,
-          statics: statics + 1,
+          statics: statics + segmentScore(partsLength, index),
           dynamics,
           optionals,
           extract,
@@ -1319,15 +1336,7 @@ function getNodeMatch<T extends RouteLike>(
     }
   }
 
-  if (bestMatch && wildcardMatch) {
-    return isFrameMoreSpecific(wildcardMatch, bestMatch)
-      ? bestMatch
-      : wildcardMatch
-  }
-
   if (bestMatch) return bestMatch
-
-  if (wildcardMatch) return wildcardMatch
 
   if (fuzzy && bestFuzzy) {
     let sliceIndex = bestFuzzy.index
@@ -1341,6 +1350,19 @@ function getNodeMatch<T extends RouteLike>(
   }
 
   return null
+}
+
+function segmentScore(partsLength: number, index: number): number {
+  // The specificity scores are bitmasks over consumed URL segments. Earlier
+  // URL segments should dominate later ones when comparing scores, so the
+  // first real segment gets the highest bit and the last gets bit 0. Since
+  // `parts[0]` is the empty string before the leading slash, real URL segments
+  // are [1, partsLength), making this segment's bit `partsLength - index - 1`.
+  return 2 ** (partsLength - index - 1)
+}
+
+function isPerfectStaticMatch(statics: number, partsLength: number): boolean {
+  return statics === 2 ** (partsLength - 1) - 1
 }
 
 function validateMatchParams<T extends RouteLike>(
