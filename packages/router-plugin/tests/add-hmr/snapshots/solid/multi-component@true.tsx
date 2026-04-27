@@ -1,4 +1,5 @@
-const $$splitComponentImporter = () => import('arrow-function.tsx?tsr-split=component');
+const $$splitErrorComponentImporter = () => import('multi-component.tsx?tsr-split=errorComponent');
+const $$splitComponentImporter = () => import('multi-component.tsx?tsr-split=component');
 import { lazyRouteComponent } from '@tanstack/solid-router';
 import { createFileRoute } from '@tanstack/solid-router';
 import { fetchPosts } from '../posts';
@@ -10,9 +11,18 @@ const TSRSplitComponent = (() => {
 if (import.meta.hot) {
   (import.meta.hot.data ??= {})["tsr-split-component:component"] = TSRSplitComponent;
 }
+const TSRSplitErrorComponent = (() => {
+  const hot = import.meta.hot;
+  const hotData = hot ? hot.data ??= {} : undefined;
+  return hotData?.["tsr-split-component:errorComponent"] ?? lazyRouteComponent($$splitErrorComponentImporter, "errorComponent");
+})();
+if (import.meta.hot) {
+  (import.meta.hot.data ??= {})["tsr-split-component:errorComponent"] = TSRSplitErrorComponent;
+}
 export const Route = createFileRoute('/posts')({
   loader: fetchPosts,
-  component: TSRSplitComponent
+  component: TSRSplitComponent,
+  errorComponent: TSRSplitErrorComponent
 });
 if (import.meta.hot) {
   const hot = import.meta.hot;

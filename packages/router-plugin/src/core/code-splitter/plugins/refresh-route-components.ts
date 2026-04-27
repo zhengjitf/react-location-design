@@ -5,7 +5,7 @@ import {
 } from '../../utils'
 import type { ReferenceRouteCompilerPlugin } from '../plugins'
 
-const REACT_REFRESH_ROUTE_COMPONENT_IDENTS = new Set([
+const ROUTE_COMPONENT_OPTION_KEYS = new Set([
   'component',
   'shellComponent',
   'pendingComponent',
@@ -27,7 +27,7 @@ function hoistInlineRouteComponents(ctx: {
 
     const key = getObjectPropertyKeyName(prop)
 
-    if (!key || !REACT_REFRESH_ROUTE_COMPONENT_IDENTS.has(key)) {
+    if (!key || !ROUTE_COMPONENT_OPTION_KEYS.has(key)) {
       return
     }
 
@@ -60,11 +60,11 @@ function hoistInlineRouteComponents(ctx: {
   return true
 }
 
-export function createReactRefreshRouteComponentsPlugin(): ReferenceRouteCompilerPlugin {
+export function createRefreshRouteComponentsPlugin(): ReferenceRouteCompilerPlugin {
   return {
-    name: 'react-refresh-route-components',
+    name: 'refresh-route-components',
     getStableRouteOptionKeys() {
-      return [...REACT_REFRESH_ROUTE_COMPONENT_IDENTS]
+      return [...ROUTE_COMPONENT_OPTION_KEYS]
     },
     onUnsplittableRoute(ctx) {
       if (!ctx.opts.addHmr) {
