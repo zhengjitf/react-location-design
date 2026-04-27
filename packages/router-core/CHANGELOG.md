@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.17
+
+### Patch Changes
+
+- wildcard nodes have the same priority rules as other nodes in route matching ([#7273](https://github.com/TanStack/router/pull/7273))
+
 ## 1.168.16
 
 ### Patch Changes
