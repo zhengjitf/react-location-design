@@ -34,11 +34,11 @@ function hotExpressionAstFor(hmrStyle: HmrStyle): t.Expression {
   )
 }
 
-export function createStableHmrSplitRouteComponentsPlugin(opts: {
+export function createReactStableHmrSplitRouteComponentsPlugin(opts: {
   hmrStyle: HmrStyle
 }): ReferenceRouteCompilerPlugin {
   return {
-    name: 'stable-hmr-split-route-components',
+    name: 'react-stable-hmr-split-route-components',
     onSplitRouteProperty(ctx) {
       if (ctx.splitNodeMeta.splitStrategy !== 'lazyRouteComponent') {
         return

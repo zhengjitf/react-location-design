@@ -2,17 +2,9 @@ const $$splitComponentImporter = () => import('arrow-function.tsx?tsr-split=comp
 import { lazyRouteComponent } from '@tanstack/solid-router';
 import { createFileRoute } from '@tanstack/solid-router';
 import { fetchPosts } from '../posts';
-const TSRSplitComponent = (() => {
-  const hot = import.meta.hot;
-  const hotData = hot ? hot.data ??= {} : undefined;
-  return hotData?.["tsr-split-component:component"] ?? lazyRouteComponent($$splitComponentImporter, "component");
-})();
-if (import.meta.hot) {
-  (import.meta.hot.data ??= {})["tsr-split-component:component"] = TSRSplitComponent;
-}
 export const Route = createFileRoute('/posts')({
   loader: fetchPosts,
-  component: TSRSplitComponent
+  component: lazyRouteComponent($$splitComponentImporter, 'component')
 });
 if (import.meta.hot) {
   const hot = import.meta.hot;
@@ -40,7 +32,7 @@ if (import.meta.hot) {
         const oldHasShellComponent = "shellComponent" in oldRoute.options;
         const newHasShellComponent = "shellComponent" in newRoute.options;
         const preserveComponentIdentity = oldHasShellComponent === newHasShellComponent;
-        const componentKeys = ["component", "shellComponent", "pendingComponent", "errorComponent", "notFoundComponent"];
+        const componentKeys = [];
         if (preserveComponentIdentity) {
           componentKeys.forEach(key => {
             if (key in oldRoute.options && key in newRoute.options) {
