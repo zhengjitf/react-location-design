@@ -1,5 +1,11 @@
 # @tanstack/router-core
 
+## 1.168.18
+
+### Patch Changes
+
+- prevent isServer exports from being transformed to top-level vars so rspack can dead-code eliminate them ([#7293](https://github.com/TanStack/router/pull/7293))
+
 ## 1.168.17
 
 ### Patch Changes
