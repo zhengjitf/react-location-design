@@ -1,5 +1,6 @@
 import * as t from '@babel/types'
 import babel from '@babel/core'
+import { hasKeys } from '@tanstack/router-core'
 import path from 'pathe'
 import { cleanId, codeFrameError, stripMethodCall } from './utils'
 import type { CompilationContext, RewriteCandidate, ServerFn } from './types'
@@ -435,11 +436,7 @@ export function handleCreateServerFn(
   }
 
   // Notify about discovered functions (only for non-provider files)
-  if (
-    !isProviderFile &&
-    Object.keys(serverFnsById).length > 0 &&
-    context.onServerFnsById
-  ) {
+  if (!isProviderFile && hasKeys(serverFnsById) && context.onServerFnsById) {
     context.onServerFnsById(serverFnsById)
   }
 
