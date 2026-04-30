@@ -1,5 +1,17 @@
 # @tanstack/vue-start
 
+## 1.167.46
+
+### Patch Changes
+
+- Updated dependencies [[`c992495`](https://github.com/TanStack/router/commit/c992495bf4010ff4c3597bb1f3b1ba02594e857e)]:
+  - @tanstack/vue-router@1.169.0
+  - @tanstack/start-client-core@1.167.22
+  - @tanstack/start-plugin-core@1.169.8
+  - @tanstack/start-server-core@1.167.24
+  - @tanstack/vue-start-client@1.166.40
+  - @tanstack/vue-start-server@1.166.41
+
 ## 1.167.45
 
 ### Patch Changes
