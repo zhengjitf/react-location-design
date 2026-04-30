@@ -1,5 +1,11 @@
 # @tanstack/start-client-core
 
+## 1.168.0
+
+### Minor Changes
+
+- Add a `strict` option to `createServerFn` for type-level server function serialization checks. Use `strict: false` to opt out for input and output values, or `strict: { output: false }` to opt out for return values only. ([#7277](https://github.com/TanStack/router/pull/7277))
+
 ## 1.167.22
 
 ### Patch Changes
