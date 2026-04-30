@@ -1,5 +1,11 @@
 # @tanstack/start-plugin-core
 
+## 1.169.10
+
+### Patch Changes
+
+- Ignore fully type-only imports and re-exports when collecting import-protection sources so type-only references to protected modules do not trigger violations. ([#7305](https://github.com/TanStack/router/pull/7305))
+
 ## 1.169.9
 
 ### Patch Changes
