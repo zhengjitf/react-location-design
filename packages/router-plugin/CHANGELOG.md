@@ -1,5 +1,11 @@
 # @tanstack/router-plugin
 
+## 1.167.32
+
+### Patch Changes
+
+- Replace global route metadata with explicit router plugin contexts so multiple router plugin instances cannot cross-transform route files. ([#7313](https://github.com/TanStack/router/pull/7313))
+
 ## 1.167.31
 
 ### Patch Changes
