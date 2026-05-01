@@ -1,5 +1,17 @@
 # @tanstack/react-start
 
+## 1.167.58
+
+### Patch Changes
+
+- Add compiler-driven RSC CSS auto-injection for Start RSC render APIs and wire it into the React Start Vite and Rsbuild adapters. This ensures same-file CSS module dependencies are discovered for `renderServerComponent`, `createCompositeComponent`, and JSX-based `renderToReadableStream` calls. ([#7310](https://github.com/TanStack/router/pull/7310))
+
+  Also add a configurable server function provider module directive hook used by the React Rsbuild RSC adapter to emit `"use server-entry"` only for extracted provider files.
+
+- Updated dependencies [[`ae453b7`](https://github.com/TanStack/router/commit/ae453b78624cac1b574f0d1efbfbf6ca03922c6c)]:
+  - @tanstack/react-start-rsc@0.0.37
+  - @tanstack/start-plugin-core@1.169.13
+
 ## 1.167.57
 
 ### Patch Changes
