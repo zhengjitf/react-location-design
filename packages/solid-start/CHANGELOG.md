@@ -1,5 +1,16 @@
 # @tanstack/solid-start
 
+## 1.167.57
+
+### Patch Changes
+
+- Add experimental HTTP 103 Early Hints support to Start server handlers. ([#7324](https://github.com/TanStack/router/pull/7324))
+
+- Updated dependencies [[`238ea4a`](https://github.com/TanStack/router/commit/238ea4a4998ab3a7fd528b317e1935766ac65df8)]:
+  - @tanstack/start-server-core@1.167.27
+  - @tanstack/solid-start-server@1.166.48
+  - @tanstack/start-plugin-core@1.169.15
+
 ## 1.167.56
 
 ### Patch Changes

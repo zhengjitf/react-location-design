@@ -1,5 +1,17 @@
 # @tanstack/react-start
 
+## 1.167.60
+
+### Patch Changes
+
+- Add experimental HTTP 103 Early Hints support to Start server handlers. ([#7324](https://github.com/TanStack/router/pull/7324))
+
+- Updated dependencies [[`238ea4a`](https://github.com/TanStack/router/commit/238ea4a4998ab3a7fd528b317e1935766ac65df8)]:
+  - @tanstack/start-server-core@1.167.27
+  - @tanstack/react-start-server@1.166.49
+  - @tanstack/react-start-rsc@0.0.39
+  - @tanstack/start-plugin-core@1.169.15
+
 ## 1.167.59
 
 ### Patch Changes

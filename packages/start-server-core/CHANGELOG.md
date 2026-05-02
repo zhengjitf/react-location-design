@@ -1,5 +1,11 @@
 # @tanstack/start-server-core
 
+## 1.167.27
+
+### Patch Changes
+
+- Add experimental HTTP 103 Early Hints support to Start server handlers. ([#7324](https://github.com/TanStack/router/pull/7324))
+
 ## 1.167.26
 
 ### Patch Changes
