@@ -1,5 +1,11 @@
 # @tanstack/start-server-core
 
+## 1.167.28
+
+### Patch Changes
+
+- Add opt-in Start response Link headers for collected Early Hints. ([#7327](https://github.com/TanStack/router/pull/7327))
+
 ## 1.167.27
 
 ### Patch Changes

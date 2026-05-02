@@ -1,5 +1,14 @@
 # @tanstack/solid-start-server
 
+## 1.166.49
+
+### Patch Changes
+
+- Add opt-in Start response Link headers for collected Early Hints. ([#7327](https://github.com/TanStack/router/pull/7327))
+
+- Updated dependencies [[`709627f`](https://github.com/TanStack/router/commit/709627f3dbc6d97daa547a1401ef42a53bc4be32)]:
+  - @tanstack/start-server-core@1.167.28
+
 ## 1.166.48
 
 ### Patch Changes
