@@ -43,7 +43,7 @@ body:
         - either a Stackblitz project (use this pre-configured Stackblitz project ([file-based routes](https://stackblitz.com/github/tanstack/router/tree/main/examples/react/quickstart-file-based?file=src%2Fmain.tsx)|[code-based routes](https://stackblitz.com/github/tanstack/router/tree/main/examples/react/quickstart?file=src%2Fmain.tsx)))
         - or a public git repo.
         In case of a git repo, the issue must be reproducible **directly** after cloning and installing dependencies.
-        
+
         If you dont supply a reproducer that meets the above requirements, this issue will be closed.
       placeholder: reproduction URL
     validations:
